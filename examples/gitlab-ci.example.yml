@@ -1,0 +1,75 @@
+# Example: consume ghcr.io/himanshuramavat/php-ci in GitLab CI
+# Copy relevant sections into your project's .gitlab-ci.yml
+
+default:
+  image: ghcr.io/himanshuramavat/php-ci:8.3
+
+variables:
+  COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+
+cache:
+  key: "${CI_COMMIT_REF_SLUG}-composer"
+  paths:
+    - .composer-cache/
+    - vendor/
+
+stages:
+  - validate
+  - test
+  - build
+
+# Optional: authenticate when the GHCR package is private
+# before_script:
+#   - echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+
+composer:install:
+  stage: validate
+  script:
+    - composer install --prefer-dist --no-progress --no-interaction
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 hour
+
+php:lint:
+  stage: validate
+  needs: [composer:install]
+  script:
+    - php -v
+    - php -m
+    - vendor/bin/php-cs-fixer fix --dry-run --diff || true
+
+typo3:unit:
+  stage: test
+  needs: [composer:install]
+  services:
+    - name: mysql:8.0
+      alias: mysql
+  variables:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: typo3_ci
+    DATABASE_URL: "mysql://root:root@mysql:3306/typo3_ci"
+  script:
+    - vendor/bin/phpunit --colors=always
+
+typo3:build-assets:
+  stage: build
+  image: ghcr.io/himanshuramavat/php-ci:8.3
+  needs: [composer:install]
+  script:
+    - composer install --no-dev --prefer-dist --no-interaction
+    - php vendor/bin/typo3 cache:flush || true
+  artifacts:
+    paths:
+      - public/
+    expire_in: 1 week
+
+# Pin a specific immutable release for production deploy pipelines
+deploy:production:
+  stage: build
+  image: ghcr.io/himanshuramavat/php-ci:8.3-v1.0.0
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+    - echo "Deploy step goes here"

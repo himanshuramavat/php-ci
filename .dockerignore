@@ -1,0 +1,44 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# CI/CD (not needed inside build context)
+.github
+.gitlab-ci.yml
+
+# Documentation and examples (not part of the image)
+README.md
+docs
+examples
+*.md
+!Dockerfile
+
+# Local development
+.env
+.env.*
+*.local
+
+# Editor and OS artifacts
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Test and scratch artifacts
+tmp
+temp
+*.log
+coverage
+.phpunit.cache
+vendor
+node_modules
+
+# Docker build artifacts
+docker-compose*.yml
+docker-compose*.yaml
+*.tar
+*.tgz

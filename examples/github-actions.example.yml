@@ -1,0 +1,45 @@
+# Example: consume ghcr.io/himanshuramavat/php-ci in GitHub Actions
+# Copy relevant sections into .github/workflows/ci.yml in your application repository
+
+name: Application CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php-ci:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/himanshuramavat/php-ci:8.3
+    defaults:
+      run:
+        shell: bash
+        working-directory: /builds
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Verify PHP extensions
+        run: |
+          php -m | grep -E '^(mysqli|sodium|pdo_mysql|intl|zip)$'
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --colors=always
+
+  # Pin immutable tag for release builds
+  release-build:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/himanshuramavat/php-ci:8.3-v1.0.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: composer install --no-dev --prefer-dist --optimize-autoloader

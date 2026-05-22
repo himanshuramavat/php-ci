@@ -1,0 +1,128 @@
+name: Publish PHP CI Image
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      image_version:
+        description: 'Semantic version embedded in tags (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+      php_versions:
+        description: 'Comma-separated PHP minor versions to build (e.g. 8.3,8.2)'
+        required: true
+        default: '8.3,8.2'
+      push_latest:
+        description: 'Push :latest tag (only applied to the highest PHP version built)'
+        type: boolean
+        default: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: himanshuramavat/php-ci
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  resolve-version:
+    name: Resolve image version
+    runs-on: ubuntu-latest
+    outputs:
+      image_version: ${{ steps.version.outputs.image_version }}
+      php_matrix: ${{ steps.php.outputs.php_matrix }}
+      push_latest: ${{ steps.latest.outputs.push_latest }}
+    steps:
+      - name: Resolve semantic version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "image_version=${{ github.event.inputs.image_version }}" >> "${GITHUB_OUTPUT}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "image_version=${GITHUB_REF#refs/tags/v}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "ERROR: Publish workflow must be triggered by a v* tag or workflow_dispatch." >&2
+            exit 1
+          fi
+
+      - name: Resolve PHP versions matrix
+        id: php
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            versions="${{ github.event.inputs.php_versions }}"
+          else
+            versions="8.3,8.2"
+          fi
+          php_matrix="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | jq -R . | jq -s -c .)"
+          echo "php_matrix=${php_matrix}" >> "${GITHUB_OUTPUT}"
+
+      - name: Resolve push_latest flag
+        id: latest
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "push_latest=${{ github.event.inputs.push_latest }}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "push_latest=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+  build-and-push:
+    name: Build PHP ${{ matrix.php-version }}
+    needs: resolve-version
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ${{ fromJson(needs.resolve-version.outputs.php_matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ matrix.php-version }}
+            type=raw,value=${{ matrix.php-version }}-v${{ needs.resolve-version.outputs.image_version }}
+            type=raw,value=latest,enable=${{ needs.resolve-version.outputs.push_latest == 'true' && matrix.php-version == '8.3' }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          sbom: false
+          build-args: |
+            PHP_VERSION=${{ matrix.php-version }}
+            IMAGE_VERSION=${{ needs.resolve-version.outputs.image_version }}
+            SOURCE_REPOSITORY=${{ github.server_url }}/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=php-ci-${{ matrix.php-version }}
+          cache-to: type=gha,mode=max,scope=php-ci-${{ matrix.php-version }}
+
+      - name: Post-build smoke test (pulled image)
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.php-version }}"
+          docker pull "${IMAGE}"
+          docker run --rm "${IMAGE}" php -m | grep -qi '^mysqli$'
+          docker run --rm "${IMAGE}" php -m | grep -qi '^sodium$'
+          docker run --rm "${IMAGE}" php -m | grep -qi '^pdo_mysql$'
+          docker run --rm "${IMAGE}" composer --version
