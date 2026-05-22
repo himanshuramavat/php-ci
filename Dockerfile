@@ -46,8 +46,18 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libonig-dev \
         libxml2-dev \
         libzip-dev \
+        libpq-dev \
+        libsqlite3-dev \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libwebp-dev \
+        libfreetype6-dev \
         ${PHPIZE_DEPS}; \
     docker-php-ext-configure intl; \
+    docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+        --with-webp; \
     docker-php-ext-install -j"$(nproc)" \
         intl \
         mbstring \
@@ -55,7 +65,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         opcache \
         pdo_mysql \
         xml \
-        zip; \
+        zip \
+        pdo_pgsql \
+        pgsql \
+        pdo_sqlite \
+        sqlite3 \
+        bcmath \
+        gd; \
+    pecl install redis; \
+    docker-php-ext-enable redis; \
     apt-get purge -y -qq ${PHPIZE_DEPS}; \
     apt-get autoremove -y -qq; \
     rm -rf /tmp/* /var/tmp/* /usr/src/php*
@@ -78,12 +96,12 @@ COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 # Fail the image build immediately if required tooling is missing or broken.
 RUN --mount=type=cache,target=/tmp/composer-cache,sharing=locked \
     set -eux; \
-    for ext in mysqli sodium pdo_mysql intl zip mbstring fileinfo json ctype tokenizer xml pdo; do \
+    for ext in mysqli sodium pdo_mysql intl zip mbstring fileinfo json ctype tokenizer xml pdo pdo_pgsql pgsql pdo_sqlite sqlite3 bcmath gd redis; do \
       php -r "exit(extension_loaded('${ext}') ? 0 : 1);" \
         || { echo "ERROR: Missing PHP extension: ${ext}" >&2; exit 1; }; \
     done; \
     php -m | grep -qi 'opcache'; \
-    php -m | grep -qE '^(mysqli|sodium|PDO|pdo_mysql|intl|zip)$'; \
+    php -m | grep -qE '^(mysqli|sodium|PDO|pdo_mysql|intl|zip|pdo_pgsql|pgsql|pdo_sqlite|sqlite3|bcmath|gd|redis)$'; \
     composer --version | grep -qi 'Composer version'; \
     git --version >/dev/null
 
