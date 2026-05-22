@@ -15,31 +15,6 @@ Build once, push to GitHub Container Registry (GHCR), and reuse across:
 - Local development workflows
 - Internal CI/CD infrastructure
 
-**Primary image**
-
-```bash
-ghcr.io/himanshuramavat/php-ci:8.3
-```
-
----
-
-## Table of Contents
-
-- Features
-- Quick Start
-- Image Tagging Strategy
-- What's Included
-- Project Structure
-- Design Decisions
-- Build / Login / Push / Pull
-- Continuous Integration
-- Publishing
-- Consumer Examples
-- Local Development
-- Contributing
-- Maintainer
-- License
-
 ---
 
 ## Features
@@ -49,6 +24,14 @@ ghcr.io/himanshuramavat/php-ci:8.3
 ✅ Composer 2 pre-installed
 
 ✅ TYPO3 and Laravel ready
+
+✅ PostgreSQL and SQLite support
+
+✅ Redis extension support
+
+✅ GD image processing support
+
+✅ BCMath extension support
 
 ✅ Optimized multi-stage Docker build
 
@@ -135,6 +118,10 @@ TYPO3 PHP 8.2 projects:
 mysqli
 pdo
 pdo_mysql
+pdo_pgsql
+pgsql
+pdo_sqlite
+sqlite3
 sodium
 mbstring
 intl
@@ -145,7 +132,16 @@ json
 tokenizer
 fileinfo
 opcache
+bcmath
+gd
+redis
 ```
+
+### Database Support
+
+- MySQL / MariaDB
+- PostgreSQL
+- SQLite
 
 ### System Packages
 
@@ -156,6 +152,12 @@ unzip
 zip
 jq
 ca-certificates
+libpq-dev
+libsqlite3-dev
+libpng-dev
+libjpeg62-turbo-dev
+libwebp-dev
+libfreetype6-dev
 ```
 
 ### Tools
@@ -168,7 +170,9 @@ ca-certificates
 
 Build immediately fails if:
 
-- Required extensions are missing
+- Required PHP extensions are missing
+- Database drivers fail to load
+- Redis extension validation fails
 - Composer is missing
 - Runtime validation fails
 
@@ -187,6 +191,7 @@ Build immediately fails if:
 ├── examples/
 │   ├── gitlab-ci.example.yml
 │   └── github-actions.example.yml
+├── test-local.sh
 └── README.md
 ```
 
@@ -232,6 +237,7 @@ Benefits:
 Build checks:
 
 - PHP extensions
+- Database drivers
 - Composer
 - Runtime dependencies
 
@@ -319,7 +325,11 @@ Runs on:
 Checks:
 
 - Image build
-- Extensions
+- PHP extensions
+- PostgreSQL support
+- SQLite support
+- GD extension
+- Redis extension
 - Composer
 - git
 - jq
@@ -358,34 +368,84 @@ Configure:
 
 ## Consumer Examples
 
-GitLab:
+### GitLab
 
-```text
-examples/gitlab-ci.example.yml
+```yaml
+image: ghcr.io/himanshuramavat/php-ci:8.3
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - composer install
+    - vendor/bin/phpunit
 ```
 
-GitHub Actions:
+### GitHub Actions
 
-```text
-examples/github-actions.example.yml
+```yaml
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/himanshuramavat/php-ci:8.3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run tests
+        run: vendor/bin/phpunit
 ```
 
 ---
 
 ## Local Development
 
+### Pull image
+
 ```bash
 docker pull ghcr.io/himanshuramavat/php-ci:8.3
+```
 
+### Open shell inside container
+
+```bash
 docker run --rm -it \
 -v "$PWD:/builds" \
 -w /builds \
 ghcr.io/himanshuramavat/php-ci:8.3 \
 bash
+```
 
+### Run Composer
+
+```bash
 composer install
+```
 
+### Run PHPUnit
+
+```bash
 vendor/bin/phpunit
+```
+
+### Run local validation script
+
+```bash
+chmod +x test-local.sh
+./test-local.sh
 ```
 
 ---
