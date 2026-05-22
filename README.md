@@ -356,35 +356,6 @@ Configure:
 
 ---
 
-## Repository Setup
-
-1. Push repository
-
-```bash
-himanshuramavat/php-ci
-```
-
-2. Enable:
-
-```text
-Settings
-→ Actions
-→ General
-→ Workflow permissions
-→ Read and write
-```
-
-3. Make package public:
-
-```text
-Packages
-→ php-ci
-→ Package settings
-→ Change visibility
-```
-
----
-
 ## Consumer Examples
 
 GitLab:
@@ -463,7 +434,7 @@ https://github.com/HimanshuRamavat
 
 Website:
 
-https://himanshuramavat.xyz
+https://himanshuramavat.in
 
 ---
 
