@@ -1,9 +1,10 @@
 # php-ci — Reusable PHP CI Docker Image
 
-[![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.2-blue)]()
-[![Docker](https://img.shields.io/badge/Docker-GHCR-blue)]()
-[![License](https://img.shields.io/badge/License-Apache%202.0-green)]()
-[![CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions)
+[![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.2-blue)](https://www.php.net/)
+[![Docker](https://img.shields.io/badge/Docker-GHCR-blue)](https://ghcr.io/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
+[![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
+[![Publish](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
 
 Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PHP** projects.
 
