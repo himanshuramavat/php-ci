@@ -70,8 +70,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         pgsql \
         pdo_sqlite \
         sqlite3 \
-        bcmath \
-        gd; \
+        bcmath; \
+    docker-php-ext-install -j"$(nproc)" gd; \
     printf "\n" | pecl install redis; \
     docker-php-ext-enable redis; \
     apt-get purge -y -qq ${PHPIZE_DEPS}; \
