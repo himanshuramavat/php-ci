@@ -47,7 +47,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libxml2-dev \
         libzip-dev \
         libpq-dev \
-        libsqlite3-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
         libwebp-dev \
@@ -68,8 +67,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         zip \
         pdo_pgsql \
         pgsql \
-        pdo_sqlite \
-        sqlite3 \
         bcmath; \
     docker-php-ext-install -j"$(nproc)" gd; \
     printf "\n" | pecl install redis; \
