@@ -50,15 +50,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libsqlite3-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
-        libjpeg-dev \
         libwebp-dev \
         libfreetype6-dev \
         ${PHPIZE_DEPS}; \
     docker-php-ext-configure intl; \
     docker-php-ext-configure gd \
         --with-freetype \
-        --with-jpeg=/usr/include/ \
-        --with-webp=/usr/include/; \
+        --with-jpeg \
+        --with-webp; \
     docker-php-ext-install -j"$(nproc)" \
         intl \
         mbstring \
