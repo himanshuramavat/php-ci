@@ -50,14 +50,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libsqlite3-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
+        libjpeg-dev \
         libwebp-dev \
         libfreetype6-dev \
         ${PHPIZE_DEPS}; \
     docker-php-ext-configure intl; \
     docker-php-ext-configure gd \
         --with-freetype \
-        --with-jpeg \
-        --with-webp; \
+        --with-jpeg=/usr/include/ \
+        --with-webp=/usr/include/; \
     docker-php-ext-install -j"$(nproc)" \
         intl \
         mbstring \
@@ -72,7 +73,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         sqlite3 \
         bcmath \
         gd; \
-    pecl install redis; \
+    printf "\n" | pecl install redis; \
     docker-php-ext-enable redis; \
     apt-get purge -y -qq ${PHPIZE_DEPS}; \
     apt-get autoremove -y -qq; \
