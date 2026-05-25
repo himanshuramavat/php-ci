@@ -1,6 +1,6 @@
 # php-ci — Reusable PHP CI Docker Image
 
-[![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.2-blue)](https://www.php.net/)
+[![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2-blue)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Docker-GHCR-blue)](https://ghcr.io/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
 [![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
@@ -18,7 +18,7 @@ Build once, push to GitHub Container Registry (GHCR), and reuse across:
 **Primary image**
 
 ```bash
-ghcr.io/himanshuramavat/php-ci:8.3
+ghcr.io/himanshuramavat/php-ci:8.4
 ```
 
 ---
@@ -44,11 +44,19 @@ ghcr.io/himanshuramavat/php-ci:8.3
 
 ## Features
 
-✅ PHP 8.3 and 8.2 support
+✅ PHP 8.4, 8.3 and 8.2 support
 
 ✅ Composer 2 pre-installed
 
-✅ TYPO3 and Laravel ready
+✅ TYPO3 (SQLite functional tests), Laravel, PostgreSQL, Redis ready
+
+✅ PostgreSQL and SQLite support
+
+✅ Redis extension support
+
+✅ GD image processing support
+
+✅ BCMath extension support
 
 ✅ Optimized multi-stage Docker build
 
@@ -69,13 +77,13 @@ ghcr.io/himanshuramavat/php-ci:8.3
 ### GitLab CI / GitHub Actions
 
 ```yaml
-image: ghcr.io/himanshuramavat/php-ci:8.3
+image: ghcr.io/himanshuramavat/php-ci:8.4
 ```
 
 ### Pull image
 
 ```bash
-docker pull ghcr.io/himanshuramavat/php-ci:8.3
+docker pull ghcr.io/himanshuramavat/php-ci:8.4
 ```
 
 ### Run Composer
@@ -84,7 +92,7 @@ docker pull ghcr.io/himanshuramavat/php-ci:8.3
 docker run --rm \
 -v "$PWD:/builds" \
 -w /builds \
-ghcr.io/himanshuramavat/php-ci:8.3 \
+ghcr.io/himanshuramavat/php-ci:8.4 \
 composer install
 ```
 
@@ -94,29 +102,30 @@ composer install
 
 | Tag | Purpose | Mutability |
 |------|----------|------------|
-| `8.3` | Primary CI PHP version | Rolling |
+| `8.4` | Primary CI PHP version | Rolling |
+| `8.3` | Supported | Rolling |
 | `8.2` | Legacy support | Rolling |
-| `latest` | Alias of latest stable | Rolling |
-| `8.3-v1.0.0` | Immutable release | Fixed |
+| `latest` | Alias of highest PHP built (8.4) | Rolling |
+| `8.4-v1.1.0` | Immutable release | Fixed |
 
 ### Recommendations
 
 Development:
 
 ```bash
-8.3
+8.4
 ```
 
 Main branch:
 
 ```bash
-8.3
+8.4
 ```
 
 Production:
 
 ```bash
-8.3-v1.0.0
+8.4-v1.1.0
 ```
 
 TYPO3 PHP 8.2 projects:
@@ -135,6 +144,12 @@ TYPO3 PHP 8.2 projects:
 mysqli
 pdo
 pdo_mysql
+pdo_pgsql
+pgsql
+pdo_sqlite
+redis
+gd
+bcmath
 sodium
 mbstring
 intl
@@ -147,6 +162,14 @@ fileinfo
 opcache
 ```
 
+**TYPO3 extension CI:** `pdo_sqlite` supports TYPO3 Testing Framework functional tests without a database service. **Laravel/MySQL:** use `pdo_mysql`. **PostgreSQL:** use `pdo_pgsql` / `pgsql`. **Redis:** PECL `redis` for cache/queue test suites.
+
+### Database support
+
+- MySQL / MariaDB
+- PostgreSQL
+- SQLite
+
 ### System Packages
 
 ```text
@@ -156,6 +179,12 @@ unzip
 zip
 jq
 ca-certificates
+libpq-dev
+libsqlite3-dev
+libpng-dev
+libjpeg62-turbo-dev
+libwebp-dev
+libfreetype6-dev
 ```
 
 ### Tools
@@ -168,7 +197,9 @@ ca-certificates
 
 Build immediately fails if:
 
-- Required extensions are missing
+- Required PHP extensions are missing
+- Database drivers fail to load
+- Redis extension validation fails
 - Composer is missing
 - Runtime validation fails
 
@@ -187,6 +218,7 @@ Build immediately fails if:
 ├── examples/
 │   ├── gitlab-ci.example.yml
 │   └── github-actions.example.yml
+├── test-local.sh
 └── README.md
 ```
 
@@ -232,6 +264,7 @@ Benefits:
 Build checks:
 
 - PHP extensions
+- Database drivers
 - Composer
 - Runtime dependencies
 
@@ -319,7 +352,11 @@ Runs on:
 Checks:
 
 - Image build
-- Extensions
+- PHP extensions
+- PostgreSQL support
+- SQLite support
+- GD extension
+- Redis extension
 - Composer
 - git
 - jq
@@ -358,34 +395,84 @@ Configure:
 
 ## Consumer Examples
 
-GitLab:
+### GitLab
 
-```text
-examples/gitlab-ci.example.yml
+```yaml
+image: ghcr.io/himanshuramavat/php-ci:8.3
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - composer install
+    - vendor/bin/phpunit
 ```
 
-GitHub Actions:
+### GitHub Actions
 
-```text
-examples/github-actions.example.yml
+```yaml
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/himanshuramavat/php-ci:8.3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run tests
+        run: vendor/bin/phpunit
 ```
 
 ---
 
 ## Local Development
 
+### Pull image
+
 ```bash
 docker pull ghcr.io/himanshuramavat/php-ci:8.3
+```
 
+### Open shell inside container
+
+```bash
 docker run --rm -it \
 -v "$PWD:/builds" \
 -w /builds \
 ghcr.io/himanshuramavat/php-ci:8.3 \
 bash
+```
 
+### Run Composer
+
+```bash
 composer install
+```
 
+### Run PHPUnit
+
+```bash
 vendor/bin/phpunit
+```
+
+### Run local validation script
+
+```bash
+chmod +x test-local.sh
+./test-local.sh
 ```
 
 ---
@@ -399,7 +486,7 @@ Contributions are welcome.
 Clone repository:
 
 ```bash
-git clone https://github.com/himanshuramavat/php-ci.git
+git clone git@github.com:himanshuramavat/php-ci.git
 ```
 
 Create branch:

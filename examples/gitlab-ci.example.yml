@@ -2,10 +2,12 @@
 # Copy relevant sections into your project's .gitlab-ci.yml
 
 default:
-  image: ghcr.io/himanshuramavat/php-ci:8.3
+  image: ghcr.io/himanshuramavat/php-ci:8.4
 
 variables:
   COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+  COMPOSER_ALLOW_SUPERUSER: "1"
+  TYPO3_SKIP_ASSET_PUBLISH: "1"
 
 cache:
   key: "${CI_COMMIT_REF_SLUG}-composer"
@@ -39,6 +41,16 @@ php:lint:
     - php -m
     - vendor/bin/php-cs-fixer fix --dry-run --diff || true
 
+# TYPO3 extension: SQLite functional tests (no DB service required)
+typo3:functional-sqlite:
+  stage: test
+  needs: [composer:install]
+  variables:
+    TYPO3_CONTEXT: Testing
+    typo3DatabaseDriver: pdo_sqlite
+  script:
+    - vendor/bin/phpunit -c Build/phpunit/FunctionalTests.xml
+
 typo3:unit:
   stage: test
   needs: [composer:install]
@@ -54,7 +66,7 @@ typo3:unit:
 
 typo3:build-assets:
   stage: build
-  image: ghcr.io/himanshuramavat/php-ci:8.3
+  image: ghcr.io/himanshuramavat/php-ci:8.4
   needs: [composer:install]
   script:
     - composer install --no-dev --prefer-dist --no-interaction
@@ -67,7 +79,7 @@ typo3:build-assets:
 # Pin a specific immutable release for production deploy pipelines
 deploy:production:
   stage: build
-  image: ghcr.io/himanshuramavat/php-ci:8.3-v1.0.0
+  image: ghcr.io/himanshuramavat/php-ci:8.4-v1.1.0
   rules:
     - if: '$CI_COMMIT_TAG'
   script:

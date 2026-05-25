@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       image_version:
-        description: 'Semantic version embedded in tags (e.g. 1.0.0)'
+        description: 'Semantic version embedded in tags (e.g. 1.1.0)'
         required: true
-        default: '1.0.0'
+        default: '1.1.0'
       php_versions:
-        description: 'Comma-separated PHP minor versions to build (e.g. 8.3,8.2)'
+        description: 'Comma-separated PHP minor versions to build (e.g. 8.4,8.3,8.2)'
         required: true
-        default: '8.3,8.2'
+        default: '8.4,8.3,8.2'
       push_latest:
         description: 'Push :latest tag (only applied to the highest PHP version built)'
         type: boolean
@@ -35,6 +35,7 @@ jobs:
       image_version: ${{ steps.version.outputs.image_version }}
       php_matrix: ${{ steps.php.outputs.php_matrix }}
       push_latest: ${{ steps.latest.outputs.push_latest }}
+      latest_php_version: ${{ steps.php.outputs.latest_php_version }}
     steps:
       - name: Resolve semantic version
         id: version
@@ -54,10 +55,12 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             versions="${{ github.event.inputs.php_versions }}"
           else
-            versions="8.3,8.2"
+            versions="8.4,8.3,8.2"
           fi
           php_matrix="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | jq -R . | jq -s -c .)"
+          latest_php_version="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | head -n1)"
           echo "php_matrix=${php_matrix}" >> "${GITHUB_OUTPUT}"
+          echo "latest_php_version=${latest_php_version}" >> "${GITHUB_OUTPUT}"
 
       - name: Resolve push_latest flag
         id: latest
@@ -98,7 +101,7 @@ jobs:
           tags: |
             type=raw,value=${{ matrix.php-version }}
             type=raw,value=${{ matrix.php-version }}-v${{ needs.resolve-version.outputs.image_version }}
-            type=raw,value=latest,enable=${{ needs.resolve-version.outputs.push_latest == 'true' && matrix.php-version == '8.3' }}
+            type=raw,value=latest,enable=${{ needs.resolve-version.outputs.push_latest == 'true' && matrix.php-version == needs.resolve-version.outputs.latest_php_version }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -122,7 +125,8 @@ jobs:
         run: |
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.php-version }}"
           docker pull "${IMAGE}"
-          docker run --rm "${IMAGE}" php -m | grep -qi '^mysqli$'
-          docker run --rm "${IMAGE}" php -m | grep -qi '^sodium$'
-          docker run --rm "${IMAGE}" php -m | grep -qi '^pdo_mysql$'
+          docker run --rm "${IMAGE}" php -m | grep -qi '^pdo_sqlite$'
+          docker run --rm "${IMAGE}" php -m | grep -qi '^pdo_pgsql$'
+          docker run --rm "${IMAGE}" php -m | grep -qi '^gd$'
+          docker run --rm "${IMAGE}" php -m | grep -qi '^redis$'
           docker run --rm "${IMAGE}" composer --version
