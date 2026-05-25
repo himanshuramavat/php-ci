@@ -1,6 +1,6 @@
 # php-ci — Reusable PHP CI Docker Image
 
-[![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.2-blue)](https://www.php.net/)
+[![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2-blue)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Docker-GHCR-blue)](https://ghcr.io/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
 [![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
@@ -15,15 +15,40 @@ Build once, push to GitHub Container Registry (GHCR), and reuse across:
 - Local development workflows
 - Internal CI/CD infrastructure
 
+**Primary image**
+
+```bash
+ghcr.io/himanshuramavat/php-ci:8.4
+```
+
+---
+
+## Table of Contents
+
+- Features
+- Quick Start
+- Image Tagging Strategy
+- What's Included
+- Project Structure
+- Design Decisions
+- Build / Login / Push / Pull
+- Continuous Integration
+- Publishing
+- Consumer Examples
+- Local Development
+- Contributing
+- Maintainer
+- License
+
 ---
 
 ## Features
 
-✅ PHP 8.3 and 8.2 support
+✅ PHP 8.4, 8.3 and 8.2 support
 
 ✅ Composer 2 pre-installed
 
-✅ TYPO3 and Laravel ready
+✅ TYPO3 (SQLite functional tests), Laravel, PostgreSQL, Redis ready
 
 ✅ PostgreSQL and SQLite support
 
@@ -52,13 +77,13 @@ Build once, push to GitHub Container Registry (GHCR), and reuse across:
 ### GitLab CI / GitHub Actions
 
 ```yaml
-image: ghcr.io/himanshuramavat/php-ci:8.3
+image: ghcr.io/himanshuramavat/php-ci:8.4
 ```
 
 ### Pull image
 
 ```bash
-docker pull ghcr.io/himanshuramavat/php-ci:8.3
+docker pull ghcr.io/himanshuramavat/php-ci:8.4
 ```
 
 ### Run Composer
@@ -67,7 +92,7 @@ docker pull ghcr.io/himanshuramavat/php-ci:8.3
 docker run --rm \
 -v "$PWD:/builds" \
 -w /builds \
-ghcr.io/himanshuramavat/php-ci:8.3 \
+ghcr.io/himanshuramavat/php-ci:8.4 \
 composer install
 ```
 
@@ -77,29 +102,30 @@ composer install
 
 | Tag | Purpose | Mutability |
 |------|----------|------------|
-| `8.3` | Primary CI PHP version | Rolling |
+| `8.4` | Primary CI PHP version | Rolling |
+| `8.3` | Supported | Rolling |
 | `8.2` | Legacy support | Rolling |
-| `latest` | Alias of latest stable | Rolling |
-| `8.3-v1.0.0` | Immutable release | Fixed |
+| `latest` | Alias of highest PHP built (8.4) | Rolling |
+| `8.4-v1.1.0` | Immutable release | Fixed |
 
 ### Recommendations
 
 Development:
 
 ```bash
-8.3
+8.4
 ```
 
 Main branch:
 
 ```bash
-8.3
+8.4
 ```
 
 Production:
 
 ```bash
-8.3-v1.0.0
+8.4-v1.1.0
 ```
 
 TYPO3 PHP 8.2 projects:
@@ -121,7 +147,9 @@ pdo_mysql
 pdo_pgsql
 pgsql
 pdo_sqlite
-sqlite3
+redis
+gd
+bcmath
 sodium
 mbstring
 intl
@@ -132,12 +160,11 @@ json
 tokenizer
 fileinfo
 opcache
-bcmath
-gd
-redis
 ```
 
-### Database Support
+**TYPO3 extension CI:** `pdo_sqlite` supports TYPO3 Testing Framework functional tests without a database service. **Laravel/MySQL:** use `pdo_mysql`. **PostgreSQL:** use `pdo_pgsql` / `pgsql`. **Redis:** PECL `redis` for cache/queue test suites.
+
+### Database support
 
 - MySQL / MariaDB
 - PostgreSQL
@@ -459,7 +486,7 @@ Contributions are welcome.
 Clone repository:
 
 ```bash
-git clone https://github.com/himanshuramavat/php-ci.git
+git clone git@github.com:himanshuramavat/php-ci.git
 ```
 
 Create branch:

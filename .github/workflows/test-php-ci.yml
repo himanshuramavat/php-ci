@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - 'feature/*'
   pull_request:
     branches:
       - main
@@ -20,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.3', '8.2']
+        php-version: ['8.4', '8.3', '8.2']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,11 +49,21 @@ jobs:
         run: |
           IMAGE="php-ci:test-${{ matrix.php-version }}"
           docker run --rm "${IMAGE}" php -m | tee /tmp/php-modules.txt
-          for ext in mysqli sodium pdo_mysql intl zip mbstring fileinfo json ctype tokenizer xml pdo; do
+          for ext in mysqli sodium pdo_mysql pdo_pgsql pgsql pdo_sqlite gd redis bcmath intl zip mbstring fileinfo json ctype tokenizer xml pdo; do
             docker run --rm "${IMAGE}" php -r "exit(extension_loaded('${ext}') ? 0 : 1);" \
               || { echo "Missing extension: ${ext}"; exit 1; }
           done
           grep -qi 'opcache' /tmp/php-modules.txt
+
+      - name: Smoke test SQLite PDO (TYPO3 functional tests)
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          docker run --rm "${IMAGE}" php -r '
+            $pdo = new PDO("sqlite::memory:");
+            $pdo->exec("CREATE TABLE t (id INTEGER PRIMARY KEY)");
+            $pdo->exec("INSERT INTO t (id) VALUES (1)");
+            exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
+          '
 
       - name: Verify Composer
         run: |
