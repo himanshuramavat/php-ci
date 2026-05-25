@@ -1,0 +1,113 @@
+name: Feature Request
+description: Request a new PHP extension, tool, image variant, CI improvement, or documentation enhancement
+title: "[Feature]: "
+labels:
+  - type: enhancement
+  - prio: medium
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement to **php-ci**.
+
+        **Before opening:** search [existing issues](https://github.com/himanshuramavat/php-ci/issues) for duplicates.
+
+        For **broken behavior** in a published image or workflow, use the *Bug Report* template instead.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What kind of improvement is this?
+      options:
+        - PHP extension
+        - System package / CLI tool
+        - New PHP version support (e.g. 8.5)
+        - Image variant (minimal / full / non-root)
+        - CI workflow improvement
+        - Documentation / examples
+        - Security / supply chain
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target_php
+    attributes:
+      label: Target PHP version(s)
+      description: Which image tags should include this?
+      multiple: true
+      options:
+        - "8.4"
+        - "8.3"
+        - "8.2"
+        - All supported versions
+        - New version only
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What CI or project scenario does this unblock? Link frameworks if relevant (TYPO3, Laravel, etc.).
+      placeholder: |
+        Our TYPO3 extension functional tests require `pcntl` for process isolation, but the image does not ship it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How should this be implemented? Extension name, package, build-arg, separate tag, etc.
+      placeholder: |
+        Add `pcntl` via `docker-php-ext-install pcntl` for all PHP 8.2–8.4 tags.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds, companion images, or reasons not to add this to the default image.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: image_size
+    attributes:
+      label: Impact on image size
+      options:
+        - Negligible (< 5 MB)
+        - Moderate (5–50 MB)
+        - Large (> 50 MB)
+        - Unknown — needs measurement
+        - Should be a separate optional variant
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority (reporter view)
+      options:
+        - Critical — blocks adoption for our team
+        - High — important but workaround exists
+        - Medium — nice improvement
+        - Low — future consideration
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate
+          required: true
+        - label: I am willing to submit a PR if the approach is agreed
+          required: false
+        - label: This should be documented in README if merged
+          required: false

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions (questions & ideas)
+    url: https://github.com/himanshuramavat/php-ci/discussions
+    about: Ask usage questions or brainstorm before opening a feature request
+  - name: Container packages (GHCR)
+    url: https://github.com/himanshuramavat/php-ci/pkgs/container/php-ci
+    about: Browse published image tags and digests

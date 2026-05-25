@@ -1,0 +1,130 @@
+name: Bug Report
+description: Report a problem with the php-ci Docker image, its extensions, or repository CI workflows
+title: "[Bug]: "
+labels:
+  - type: bug
+  - prio: medium
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        **Before opening:** search [existing issues](https://github.com/himanshuramavat/php-ci/issues) and confirm you are using a supported PHP tag (`8.4`, `8.3`, or `8.2`).
+
+        For **missing PHP extensions** or new tooling requests, use the *Feature Request* template instead.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: What part of the project is affected?
+      options:
+        - Docker image (runtime / extensions / tools)
+        - GitHub Actions workflow (test-php-ci.yml)
+        - GitHub Actions workflow (publish-php-ci.yml)
+        - Documentation (README / examples)
+        - Local test script (scripts/test-local.sh)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: php_version
+    attributes:
+      label: PHP image tag
+      description: Which image tag were you using?
+      options:
+        - "8.4 (rolling)"
+        - "8.3 (rolling)"
+        - "8.2 (rolling)"
+        - "latest (rolling)"
+        - "Immutable release tag (e.g. 8.4-v1.1.0)"
+        - "Locally built from source"
+        - "Unknown"
+    validations:
+      required: true
+
+  - type: input
+    id: image_tag
+    attributes:
+      label: Exact image reference
+      description: Full tag or digest, e.g. `ghcr.io/himanshuramavat/php-ci:8.4-v1.1.0`
+      placeholder: ghcr.io/himanshuramavat/php-ci:8.4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where did the problem occur?
+      options:
+        - GitHub Actions
+        - GitLab CI
+        - Local Docker
+        - Other CI (Jenkins, Buildkite, etc.)
+        - Image build only (docker build)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+      placeholder: e.g. `pdo_pgsql` should connect to a PostgreSQL 16 service container.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include error messages verbatim.
+      placeholder: Paste the full error output, stack trace, or CI log excerpt.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Minimal commands or CI snippet to reproduce the issue.
+      placeholder: |
+        1. docker pull ghcr.io/himanshuramavat/php-ci:8.4
+        2. docker run --rm ... php -r "..."
+        3. See error: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: CI job link, `docker run ... php -m` output, or build log (redact secrets).
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate
+          required: true
+        - label: I redacted API keys, tokens, and other secrets from logs
+          required: true
+        - label: I tested with a pinned immutable tag (not only `:latest` or rolling tags)
+          required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity (helps maintainers prioritize)
+      options:
+        - Blocks my CI pipeline entirely
+        - Major — workaround exists but painful
+        - Minor — cosmetic or docs-only
+    validations:
+      required: true
