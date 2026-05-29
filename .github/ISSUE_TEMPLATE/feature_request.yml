@@ -41,6 +41,7 @@ body:
         - "8.4"
         - "8.3"
         - "8.2"
+        - "8.1"
         - All supported versions
         - New version only
         - Not applicable
@@ -63,7 +64,7 @@ body:
       label: Proposed solution
       description: How should this be implemented? Extension name, package, build-arg, separate tag, etc.
       placeholder: |
-        Add `pcntl` via `docker-php-ext-install pcntl` for all PHP 8.2–8.4 tags.
+        Add `pcntl` via `docker-php-ext-install pcntl` for all PHP 8.1–8.4 tags.
     validations:
       required: true
 

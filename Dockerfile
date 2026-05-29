@@ -13,6 +13,12 @@
 #     --build-arg PHP_VERSION=8.3 \
 #     --build-arg IMAGE_VERSION=1.1.0 \
 #     -t ghcr.io/himanshuramavat/php-ci:8.3 .
+#
+# Build (PHP 8.1):
+#   docker build \
+#     --build-arg PHP_VERSION=8.1 \
+#     --build-arg IMAGE_VERSION=1.1.0 \
+#     -t ghcr.io/himanshuramavat/php-ci:8.1 .
 # -----------------------------------------------------------------------------
 
 ARG PHP_VERSION=8.4

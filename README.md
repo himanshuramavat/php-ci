@@ -1,24 +1,25 @@
 # php-ci — Reusable PHP CI Docker Image
 
-[![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2-blue)](https://www.php.net/)
-[![Docker](https://img.shields.io/badge/Docker-GHCR-blue)](https://ghcr.io/)
+[![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2%20%7C%208.1-blue)](https://www.php.net/)
+[![Docker](https://img.shields.io/badge/Docker-GHCR%20%7C%20Hub-blue)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
 [![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
 [![Publish](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
 
 Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PHP** projects.
 
-Build once, push to GitHub Container Registry (GHCR), and reuse across:
+Build once, push to GitHub Container Registry (GHCR) and [Docker Hub](https://hub.docker.com/r/himanshuramavat/php-ci), and reuse across:
 
 - GitHub Actions
 - GitLab CI
 - Local development workflows
 - Internal CI/CD infrastructure
 
-**Primary image**
+**Primary image** (same tags on both registries)
 
 ```bash
 ghcr.io/himanshuramavat/php-ci:8.4
+himanshuramavat/php-ci:8.4
 ```
 
 ---
@@ -44,7 +45,7 @@ ghcr.io/himanshuramavat/php-ci:8.4
 
 ## Features
 
-✅ PHP 8.4, 8.3 and 8.2 support
+✅ PHP 8.4, 8.3, 8.2 and 8.1 support
 
 ✅ Composer 2 pre-installed
 
@@ -104,7 +105,8 @@ composer install
 |------|----------|------------|
 | `8.4` | Primary CI PHP version | Rolling |
 | `8.3` | Supported | Rolling |
-| `8.2` | Legacy support | Rolling |
+| `8.2` | Supported | Rolling |
+| `8.1` | Legacy | Rolling |
 | `latest` | Alias of highest PHP built (8.4) | Rolling |
 | `8.4-v1.1.0` | Immutable release | Fixed |
 
@@ -132,6 +134,12 @@ TYPO3 PHP 8.2 projects:
 
 ```bash
 8.2
+```
+
+legacy PHP 8.1 matrices:
+
+```bash
+8.1
 ```
 
 ---
@@ -306,6 +314,16 @@ DOCKER_BUILDKIT=1 docker build \
 .
 ```
 
+PHP 8.1:
+
+```bash
+DOCKER_BUILDKIT=1 docker build \
+--build-arg PHP_VERSION=8.1 \
+--build-arg IMAGE_VERSION=1.1.0 \
+-t ghcr.io/himanshuramavat/php-ci:8.1 \
+.
+```
+
 ---
 
 ### Login
@@ -382,14 +400,6 @@ Publishing triggers:
 git tag v1.0.0
 git push origin v1.0.0
 ```
-
-### Manual workflow dispatch
-
-Configure:
-
-- image_version
-- php_versions
-- push_latest
 
 ---
 

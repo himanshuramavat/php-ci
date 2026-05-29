@@ -10,7 +10,7 @@ body:
       value: |
         Thanks for taking the time to report a bug.
 
-        **Before opening:** search [existing issues](https://github.com/himanshuramavat/php-ci/issues) and confirm you are using a supported PHP tag (`8.4`, `8.3`, or `8.2`).
+        **Before opening:** search [existing issues](https://github.com/himanshuramavat/php-ci/issues) and confirm you are using a supported PHP tag (`8.4`, `8.3`, `8.2`, or `8.1`).
 
         For **missing PHP extensions** or new tooling requests, use the *Feature Request* template instead.
 
@@ -38,6 +38,7 @@ body:
         - "8.4 (rolling)"
         - "8.3 (rolling)"
         - "8.2 (rolling)"
+        - "8.1 (rolling)"
         - "latest (rolling)"
         - "Immutable release tag (e.g. 8.4-v1.1.0)"
         - "Locally built from source"
