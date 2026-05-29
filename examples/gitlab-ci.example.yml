@@ -1,8 +1,9 @@
-# Example: consume ghcr.io/himanshuramavat/php-ci in GitLab CI
+# Example: consume himanshuramavat/php-ci in GitLab CI
+# Docker Hub (default registry) or GHCR — same tags on both
 # Copy relevant sections into your project's .gitlab-ci.yml
 
 default:
-  image: ghcr.io/himanshuramavat/php-ci:8.4
+  image: himanshuramavat/php-ci:8.4
 
 variables:
   COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
@@ -66,7 +67,7 @@ typo3:unit:
 
 typo3:build-assets:
   stage: build
-  image: ghcr.io/himanshuramavat/php-ci:8.4
+  image: himanshuramavat/php-ci:8.4
   needs: [composer:install]
   script:
     - composer install --no-dev --prefer-dist --no-interaction
@@ -79,7 +80,7 @@ typo3:build-assets:
 # Pin a specific immutable release for production deploy pipelines
 deploy:production:
   stage: build
-  image: ghcr.io/himanshuramavat/php-ci:8.4-v1.1.0
+  image: himanshuramavat/php-ci:8.4-v1.1.0
   rules:
     - if: '$CI_COMMIT_TAG'
   script:

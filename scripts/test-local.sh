@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PHP_VERSIONS="${PHP_VERSIONS:-8.4 8.3 8.2}"
+PHP_VERSIONS="${PHP_VERSIONS:-8.4 8.3 8.2 8.1}"
 REQUIRED_EXTENSIONS="mysqli sodium pdo_mysql pdo_pgsql pgsql pdo_sqlite gd redis bcmath intl zip mbstring fileinfo json ctype tokenizer xml pdo"
 
 cd "${ROOT_DIR}"

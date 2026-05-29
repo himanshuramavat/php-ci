@@ -11,17 +11,17 @@ on:
         required: true
         default: '1.1.0'
       php_versions:
-        description: 'Comma-separated PHP minor versions to build (e.g. 8.4,8.3,8.2)'
+        description: 'Comma-separated PHP minor versions to build (e.g. 8.4,8.3,8.2,8.1)'
         required: true
-        default: '8.4,8.3,8.2'
+        default: '8.4,8.3,8.2,8.1'
       push_latest:
         description: 'Push :latest tag (only applied to the highest PHP version built)'
         type: boolean
         default: true
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: himanshuramavat/php-ci
+  GHCR_IMAGE: ghcr.io/himanshuramavat/php-ci
+  DOCKERHUB_IMAGE: docker.io/himanshuramavat/php-ci
 
 permissions:
   contents: read
@@ -55,7 +55,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             versions="${{ github.event.inputs.php_versions }}"
           else
-            versions="8.4,8.3,8.2"
+            versions="8.4,8.3,8.2,8.1"
           fi
           php_matrix="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | jq -R . | jq -s -c .)"
           latest_php_version="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | head -n1)"
@@ -89,15 +89,23 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.GHCR_IMAGE }}
+            ${{ env.DOCKERHUB_IMAGE }}
           tags: |
             type=raw,value=${{ matrix.php-version }}
             type=raw,value=${{ matrix.php-version }}-v${{ needs.resolve-version.outputs.image_version }}
@@ -121,9 +129,9 @@ jobs:
           cache-from: type=gha,scope=php-ci-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-${{ matrix.php-version }}
 
-      - name: Post-build smoke test (pulled image)
+      - name: Post-build smoke test (Docker Hub)
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.php-version }}"
+          IMAGE="${{ env.DOCKERHUB_IMAGE }}:${{ matrix.php-version }}"
           docker pull "${IMAGE}"
           docker run --rm "${IMAGE}" php -m | grep -qi '^pdo_sqlite$'
           docker run --rm "${IMAGE}" php -m | grep -qi '^pdo_pgsql$'
