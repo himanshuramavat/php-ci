@@ -130,6 +130,8 @@ Production:
 8.4-v1.1.0
 ```
 
+For stable release pinning, use an immutable tag such as `8.4-v1.1.0`.
+
 TYPO3 PHP 8.2 projects:
 
 ```bash
@@ -217,18 +219,25 @@ Build immediately fails if:
 
 ```text
 .
+├── CHANGELOG.md
 ├── Dockerfile
 ├── .dockerignore
 ├── .github/
 │   ├── workflows/
 │   │   ├── test-php-ci.yml
-│   │   └── publish-php-ci.yml
-│   └── pull_request_template.md
+│   │   ├── publish-php-ci.yml
+│   │   └── weekly-rebuild.yml
+│   ├── dependabot.yml
+│   └── ISSUE_TEMPLATE/
+│       ├── bug_report.yml
+│       ├── config.yml
+│       └── feature_request.yml
 ├── examples/
 │   ├── gitlab-ci.example.yml
 │   └── github-actions.example.yml
 ├── scripts/
-│   └── test-local.sh
+│   ├── test-local.sh
+│   └── verify-image.sh
 ├── test-local.sh
 └── README.md
 ```
@@ -294,7 +303,7 @@ Prevents permission problems.
 ---
 
 ## Build / Login / Push / Pull
-
+For rolling tags and weekly rebuilds, see [CHANGELOG.md](./CHANGELOG.md) and the scheduled workflow in `.github/workflows/weekly-rebuild.yml`.
 ### Build
 
 PHP 8.3:

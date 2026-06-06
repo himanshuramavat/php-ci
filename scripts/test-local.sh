@@ -4,7 +4,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PHP_VERSIONS="${PHP_VERSIONS:-8.4 8.3 8.2 8.1}"
-REQUIRED_EXTENSIONS="mysqli sodium pdo_mysql pdo_pgsql pgsql pdo_sqlite gd redis bcmath intl zip mbstring fileinfo json ctype tokenizer xml pdo"
 
 cd "${ROOT_DIR}"
 
@@ -18,13 +17,8 @@ for PHP_VERSION in ${PHP_VERSIONS}; do
     -t "${IMAGE}" \
     .
 
-  echo "==> Verifying PHP extensions (${PHP_VERSION})"
-  docker run --rm "${IMAGE}" php -m | tee "/tmp/php-modules-${PHP_VERSION}.txt"
-  for ext in ${REQUIRED_EXTENSIONS}; do
-    docker run --rm "${IMAGE}" php -r "exit(extension_loaded('${ext}') ? 0 : 1);" \
-      || { echo "Missing extension: ${ext}"; exit 1; }
-  done
-  grep -qi 'opcache' "/tmp/php-modules-${PHP_VERSION}.txt"
+  echo "==> Verifying image (${PHP_VERSION})"
+  docker run --rm "${IMAGE}" /usr/local/bin/verify-image.sh
 
   echo "==> SQLite PDO smoke test (${PHP_VERSION})"
   docker run --rm "${IMAGE}" php -r '
@@ -33,14 +27,6 @@ for PHP_VERSION in ${PHP_VERSIONS}; do
     $pdo->exec("INSERT INTO t (id) VALUES (1)");
     exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
   '
-
-  echo "==> Verifying Composer (${PHP_VERSION})"
-  docker run --rm "${IMAGE}" composer --version
-
-  echo "==> Verifying CI utilities (${PHP_VERSION})"
-  docker run --rm "${IMAGE}" git --version
-  docker run --rm "${IMAGE}" jq --version
-  docker run --rm "${IMAGE}" test -d /builds
 
   echo "==> Composer smoke test (${PHP_VERSION})"
   docker run --rm "${IMAGE}" \

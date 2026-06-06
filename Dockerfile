@@ -74,7 +74,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         pgsql \
         xml \
         zip; \
-    pecl install redis; \
+    pecl install redis-6.3.0; \
     docker-php-ext-enable redis; \
     apt-get purge -y -qq ${PHPIZE_DEPS}; \
     apt-get autoremove -y -qq; \
@@ -94,18 +94,13 @@ FROM composer:2 AS composer-bin
 FROM php-runtime AS final
 
 COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
+COPY scripts/verify-image.sh /usr/local/bin/verify-image.sh
+RUN chmod +x /usr/local/bin/verify-image.sh
 
 # Fail the image build immediately if required tooling is missing or broken.
 RUN --mount=type=cache,target=/tmp/composer-cache,sharing=locked \
     set -eux; \
-    for ext in mysqli sodium pdo_mysql pdo_pgsql pgsql pdo_sqlite gd redis bcmath intl zip mbstring fileinfo json ctype tokenizer xml pdo; do \
-      php -r "exit(extension_loaded('${ext}') ? 0 : 1);" \
-        || { echo "ERROR: Missing PHP extension: ${ext}" >&2; exit 1; }; \
-    done; \
-    php -m | grep -qi 'opcache'; \
-    php -m | grep -qE '^(mysqli|sodium|PDO|pdo_mysql|pdo_pgsql|pgsql|pdo_sqlite|gd|redis|bcmath|intl|zip)$'; \
-    composer --version | grep -qi 'Composer version'; \
-    git --version >/dev/null
+    /usr/local/bin/verify-image.sh
 
 WORKDIR /builds
 
