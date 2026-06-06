@@ -45,18 +45,20 @@ jobs:
 
       - name: Start PostgreSQL and Redis containers
         run: |
-          docker run -d --name phpci-postgres --network host \
+          docker network create phpci-test || true
+          docker rm -f phpci-postgres phpci-redis 2>/dev/null || true
+          docker run -d --name phpci-postgres --network phpci-test \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=postgres \
             -e POSTGRES_DB=postgres \
             postgres:16-alpine
-          docker run -d --name phpci-redis --network host redis:7-alpine
+          docker run -d --name phpci-redis --network phpci-test redis:7-alpine
           for i in $(seq 1 30); do
-            docker run --rm --network host postgres:16-alpine pg_isready -h 127.0.0.1 -p 5432 -U postgres >/dev/null 2>&1 && break
+            docker run --rm --network phpci-test postgres:16-alpine pg_isready -h phpci-postgres -p 5432 -U postgres >/dev/null 2>&1 && break
             sleep 1
           done
           for i in $(seq 1 30); do
-            docker run --rm --network host redis:7-alpine redis-cli -h 127.0.0.1 ping >/dev/null 2>&1 && break
+            docker run --rm --network phpci-test redis:7-alpine redis-cli -h phpci-redis ping >/dev/null 2>&1 && break
             sleep 1
           done
 
@@ -78,8 +80,8 @@ jobs:
       - name: Smoke test PostgreSQL PDO
         run: |
           IMAGE="php-ci:test-${{ matrix.php-version }}"
-          docker run --rm --network host "${IMAGE}" php -r '
-            $pdo = new PDO("pgsql:host=127.0.0.1;port=5432;dbname=postgres","postgres","postgres");
+          docker run --rm --network phpci-test "${IMAGE}" php -r '
+            $pdo = new PDO("pgsql:host=phpci-postgres;port=5432;dbname=postgres","postgres","postgres");
             $pdo->exec("CREATE TABLE t (id SERIAL PRIMARY KEY)");
             $pdo->exec("INSERT INTO t (id) VALUES (1)");
             exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
@@ -88,9 +90,9 @@ jobs:
       - name: Smoke test Redis
         run: |
           IMAGE="php-ci:test-${{ matrix.php-version }}"
-          docker run --rm --network host "${IMAGE}" php -r '
+          docker run --rm --network phpci-test "${IMAGE}" php -r '
             $redis = new Redis();
-            $redis->connect("127.0.0.1", 6379);
+            $redis->connect("phpci-redis", 6379);
             $pong = $redis->ping();
             exit(in_array($pong, ["+PONG", "PONG"], true) ? 0 : 1);
           '
@@ -117,4 +119,5 @@ jobs:
       - name: Stop PostgreSQL and Redis containers
         if: always()
         run: |
-          docker rm -f phpci-postgres phpci-redis || true
+          docker rm -f phpci-postgres phpci-redis 2>/dev/null || true
+          docker network rm phpci-test 2>/dev/null || true
