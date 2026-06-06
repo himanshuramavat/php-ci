@@ -220,9 +220,10 @@ Build immediately fails if:
 ├── Dockerfile
 ├── .dockerignore
 ├── .github/
-│   └── workflows/
-│       ├── test-php-ci.yml
-│       └── publish-php-ci.yml
+│   ├── workflows/
+│   │   ├── test-php-ci.yml
+│   │   └── publish-php-ci.yml
+│   └── pull_request_template.md
 ├── examples/
 │   ├── gitlab-ci.example.yml
 │   └── github-actions.example.yml
