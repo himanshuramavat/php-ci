@@ -6,13 +6,13 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     labels:
-      - dependencies
-      - type: ci
+      - "dependencies"
+      - "type: ci"
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
     labels:
-      - dependencies
-      - type: ci
+      - "dependencies"
+      - "type: ci"
