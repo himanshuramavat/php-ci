@@ -3,8 +3,8 @@
 [![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2%20%7C%208.1-blue)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Docker-GHCR%20%7C%20Hub-blue)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
-[![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
-[![Publish](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
+[![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=master)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
+[![Publish](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg?branch=master)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
 
 Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PHP** projects.
 
@@ -227,6 +227,8 @@ Build immediately fails if:
 ├── examples/
 │   ├── gitlab-ci.example.yml
 │   └── github-actions.example.yml
+├── scripts/
+│   └── test-local.sh
 ├── test-local.sh
 └── README.md
 ```
