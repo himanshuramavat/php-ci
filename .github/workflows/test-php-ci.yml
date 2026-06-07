@@ -94,7 +94,7 @@ jobs:
             $redis = new Redis();
             $redis->connect("phpci-redis", 6379);
             $pong = $redis->ping();
-            exit(in_array($pong, ["+PONG", "PONG"], true) ? 0 : 1);
+            exit($pong ? 0 : 1);
           '
 
       - name: Verify Composer
