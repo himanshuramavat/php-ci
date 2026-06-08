@@ -112,7 +112,7 @@ jobs:
             type=raw,value=latest,enable=${{ needs.resolve-version.outputs.push_latest == 'true' && matrix.php-version == needs.resolve-version.outputs.latest_php_version }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
