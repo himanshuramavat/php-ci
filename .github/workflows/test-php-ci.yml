@@ -3,12 +3,10 @@ name: Test PHP CI Image
 on:
   push:
     branches:
-      - main
       - master
       - 'feature/*'
   pull_request:
     branches:
-      - main
       - master
 
 permissions:
@@ -45,15 +43,29 @@ jobs:
           cache-from: type=gha,scope=php-ci-test-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-test-${{ matrix.php-version }}
 
-      - name: Verify PHP extensions
+      - name: Start PostgreSQL and Redis containers
+        run: |
+          docker network create phpci-test || true
+          docker rm -f phpci-postgres phpci-redis 2>/dev/null || true
+          docker run -d --name phpci-postgres --network phpci-test \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=postgres \
+            postgres:16-alpine
+          docker run -d --name phpci-redis --network phpci-test redis:7-alpine
+          for i in $(seq 1 30); do
+            docker run --rm --network phpci-test postgres:16-alpine pg_isready -h phpci-postgres -p 5432 -U postgres >/dev/null 2>&1 && break
+            sleep 1
+          done
+          for i in $(seq 1 30); do
+            docker run --rm --network phpci-test redis:7-alpine redis-cli -h phpci-redis ping >/dev/null 2>&1 && break
+            sleep 1
+          done
+
+      - name: Verify built image
         run: |
           IMAGE="php-ci:test-${{ matrix.php-version }}"
-          docker run --rm "${IMAGE}" php -m | tee /tmp/php-modules.txt
-          for ext in mysqli sodium pdo_mysql pdo_pgsql pgsql pdo_sqlite gd redis bcmath intl zip mbstring fileinfo json ctype tokenizer xml pdo; do
-            docker run --rm "${IMAGE}" php -r "exit(extension_loaded('${ext}') ? 0 : 1);" \
-              || { echo "Missing extension: ${ext}"; exit 1; }
-          done
-          grep -qi 'opcache' /tmp/php-modules.txt
+          docker run --rm "${IMAGE}" /usr/local/bin/verify-image.sh
 
       - name: Smoke test SQLite PDO (TYPO3 functional tests)
         run: |
@@ -63,6 +75,26 @@ jobs:
             $pdo->exec("CREATE TABLE t (id INTEGER PRIMARY KEY)");
             $pdo->exec("INSERT INTO t (id) VALUES (1)");
             exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
+          '
+
+      - name: Smoke test PostgreSQL PDO
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          docker run --rm --network phpci-test "${IMAGE}" php -r '
+            $pdo = new PDO("pgsql:host=phpci-postgres;port=5432;dbname=postgres","postgres","postgres");
+            $pdo->exec("CREATE TABLE t (id SERIAL PRIMARY KEY)");
+            $pdo->exec("INSERT INTO t (id) VALUES (1)");
+            exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
+          '
+
+      - name: Smoke test Redis
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          docker run --rm --network phpci-test "${IMAGE}" php -r '
+            $redis = new Redis();
+            $redis->connect("phpci-redis", 6379);
+            $pong = $redis->ping();
+            exit($pong ? 0 : 1);
           '
 
       - name: Verify Composer
@@ -83,3 +115,9 @@ jobs:
             -w /builds \
             "php-ci:test-${{ matrix.php-version }}" \
             sh -c 'printf "%s\n" "{\"require\":{\"php\":\"*\"}}" > composer.json && composer install --no-interaction --no-progress'
+
+      - name: Stop PostgreSQL and Redis containers
+        if: always()
+        run: |
+          docker rm -f phpci-postgres phpci-redis 2>/dev/null || true
+          docker network rm phpci-test 2>/dev/null || true

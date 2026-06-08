@@ -3,8 +3,8 @@
 [![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2%20%7C%208.1-blue)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Docker-GHCR%20%7C%20Hub-blue)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
-[![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
-[![Publish](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg?branch=main)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
+[![Test CI](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg?branch=master)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
+[![Publish](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg?branch=master)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
 
 Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PHP** projects.
 
@@ -130,6 +130,8 @@ Production:
 8.4-v1.1.0
 ```
 
+For stable release pinning, use an immutable tag such as `8.4-v1.1.0`.
+
 TYPO3 PHP 8.2 projects:
 
 ```bash
@@ -217,16 +219,25 @@ Build immediately fails if:
 
 ```text
 .
+├── CHANGELOG.md
 ├── Dockerfile
 ├── .dockerignore
 ├── .github/
 │   ├── workflows/
 │   │   ├── test-php-ci.yml
-│   │   └── publish-php-ci.yml
-│   └── pull_request_template.md
+│   │   ├── publish-php-ci.yml
+│   │   └── weekly-rebuild.yml
+│   ├── dependabot.yml
+│   └── ISSUE_TEMPLATE/
+│       ├── bug_report.yml
+│       ├── config.yml
+│       └── feature_request.yml
 ├── examples/
 │   ├── gitlab-ci.example.yml
 │   └── github-actions.example.yml
+├── scripts/
+│   ├── test-local.sh
+│   └── verify-image.sh
 ├── test-local.sh
 └── README.md
 ```
@@ -292,7 +303,7 @@ Prevents permission problems.
 ---
 
 ## Build / Login / Push / Pull
-
+For rolling tags and weekly rebuilds, see [CHANGELOG.md](./CHANGELOG.md) and the scheduled workflow in `.github/workflows/weekly-rebuild.yml`.
 ### Build
 
 PHP 8.3:
