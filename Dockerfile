@@ -45,6 +45,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux; \
     apt-get update -qq; \
+    apt-get upgrade -y -qq --no-install-recommends; \
     apt-get install -y -qq --no-install-recommends \
         ca-certificates \
         curl \

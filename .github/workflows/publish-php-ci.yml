@@ -83,33 +83,33 @@ jobs:
         php-version: ${{ fromJson(needs.resolve-version.outputs.php_matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up QEMU (multi-arch)
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ env.GHCR_IMAGE }}
@@ -121,7 +121,7 @@ jobs:
 
       - name: Build and push image
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
@@ -149,6 +149,11 @@ jobs:
             echo "Signing ${repo}@${DIGEST}"
             cosign sign --yes "${repo}@${DIGEST}"
           done
+
+      - name: Scan published image for vulnerabilities (Trivy)
+        uses: ./.github/actions/trivy-image-scan
+        with:
+          image-ref: ${{ env.GHCR_IMAGE }}:${{ matrix.php-version }}
 
       - name: Post-build smoke test (Docker Hub)
         run: |
