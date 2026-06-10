@@ -1,0 +1,6 @@
+# linux-libc-dev ships kernel headers needed to compile PHP extensions.
+# The kernel itself does not run inside the container; these CVEs are not
+# exploitable in a container context and are suppressed to reduce noise.
+# Review periodically: https://security-tracker.debian.org/tracker/source-package/linux
+
+exp:linux-libc-dev
