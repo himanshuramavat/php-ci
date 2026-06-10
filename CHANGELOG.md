@@ -9,9 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- (none)
+
+### Fixed
+
+- (none)
+
+## [1.4.0] - 2026-06-10
+
+### Added
+
 - Trivy image vulnerability scan in CI (CRITICAL/HIGH, ignore-unfixed) via reusable composite
   action `.github/actions/trivy-image-scan`, with `.trivyignore` suppressing non-exploitable
   `linux-libc-dev` kernel-header CVEs.
+- CodeQL code scanning (GitHub default setup) for the Actions workflows.
 - GD functional smoke test (truecolor + PNG/WebP/JPEG) and MySQL/MariaDB PDO smoke test in CI
   and local runner.
 - Hadolint Dockerfile lint job (`.hadolint.yaml`).
