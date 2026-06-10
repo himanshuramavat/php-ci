@@ -1,0 +1,12 @@
+# Hadolint configuration — https://github.com/hadolint/hadolint
+failure-threshold: warning
+
+ignored:
+  # DL3008: pinning apt versions. We deliberately run `apt-get upgrade` to pull
+  # the latest security patches at build time, so pinning would be counterproductive.
+  - DL3008
+  # DL3018: apk pinning — not used (Debian base), harmless.
+  - DL3018
+
+trustedRegistries:
+  - docker.io

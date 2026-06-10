@@ -28,6 +28,17 @@ for PHP_VERSION in ${PHP_VERSIONS}; do
     exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
   '
 
+  echo "==> GD smoke test (${PHP_VERSION})"
+  docker run --rm "${IMAGE}" php -r '
+    $img = imagecreatetruecolor(10, 10);
+    if ($img === false) { exit(1); }
+    imagefilledrectangle($img, 0, 0, 9, 9, imagecolorallocate($img, 1, 2, 3));
+    $ok = imagepng($img, "/tmp/gd.png")
+      && function_exists("imagewebp")
+      && function_exists("imagecreatefromjpeg");
+    exit($ok ? 0 : 1);
+  '
+
   echo "==> Composer smoke test (${PHP_VERSION})"
   docker run --rm "${IMAGE}" \
     sh -c 'mkdir -p /tmp/smoke && cd /tmp/smoke && printf "%s\n" "{\"require\":{\"php\":\"*\"}}" > composer.json && composer install --no-interaction --no-progress'
