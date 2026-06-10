@@ -59,3 +59,8 @@ jobs:
             type=raw,value=${{ env.DOCKERHUB_IMAGE }}:latest,enable=${{ matrix.php-version == '8.4' }}
           cache-from: type=gha,scope=php-ci-weekly-rebuild-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-weekly-rebuild-${{ matrix.php-version }}
+
+      - name: Scan published image for vulnerabilities (Trivy)
+        uses: ./.github/actions/trivy-image-scan
+        with:
+          image-ref: ${{ env.GHCR_IMAGE }}:${{ matrix.php-version }}

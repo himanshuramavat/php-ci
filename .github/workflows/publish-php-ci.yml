@@ -129,6 +129,11 @@ jobs:
           cache-from: type=gha,scope=php-ci-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-${{ matrix.php-version }}
 
+      - name: Scan published image for vulnerabilities (Trivy)
+        uses: ./.github/actions/trivy-image-scan
+        with:
+          image-ref: ${{ env.GHCR_IMAGE }}:${{ matrix.php-version }}
+
       - name: Post-build smoke test (Docker Hub)
         run: |
           IMAGE="${{ env.DOCKERHUB_IMAGE }}:${{ matrix.php-version }}"

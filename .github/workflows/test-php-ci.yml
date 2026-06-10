@@ -43,6 +43,11 @@ jobs:
           cache-from: type=gha,scope=php-ci-test-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-test-${{ matrix.php-version }}
 
+      - name: Scan image for vulnerabilities (Trivy)
+        uses: ./.github/actions/trivy-image-scan
+        with:
+          image-ref: php-ci:test-${{ matrix.php-version }}
+
       - name: Start PostgreSQL and Redis containers
         run: |
           docker network create phpci-test || true

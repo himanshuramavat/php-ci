@@ -1,0 +1,20 @@
+name: Trivy image scan
+description: Scan a container image for OS and library CVEs (CRITICAL/HIGH, ignore unfixed)
+
+inputs:
+  image-ref:
+    description: Container image reference to scan (local tag or registry URL)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.34.0
+      with:
+        image-ref: ${{ inputs.image-ref }}
+        format: table
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: os,library
+        severity: CRITICAL,HIGH
