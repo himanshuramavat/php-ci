@@ -40,7 +40,7 @@ body:
         - "8.2 (rolling)"
         - "8.1 (rolling)"
         - "latest (rolling)"
-        - "Immutable release tag (e.g. 8.4-v1.1.0)"
+        - "Immutable release tag (e.g. 8.4-v1.3.0)"
         - "Locally built from source"
         - "Unknown"
     validations:
@@ -50,7 +50,7 @@ body:
     id: image_tag
     attributes:
       label: Exact image reference
-      description: Full tag or digest, e.g. `ghcr.io/himanshuramavat/php-ci:8.4-v1.1.0`
+      description: Full tag or digest, e.g. `ghcr.io/himanshuramavat/php-ci:8.4-v1.3.0`
       placeholder: ghcr.io/himanshuramavat/php-ci:8.4
     validations:
       required: true

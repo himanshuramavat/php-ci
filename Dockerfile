@@ -35,6 +35,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     COMPOSER_CACHE_DIR=/tmp/composer-cache \
     PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+# Optional extra core extensions, space-separated (e.g. "soap xsl pcntl ldap").
+# Built best-effort while the build toolchain is still present. Any system libs
+# these need must be provided via apt; common ones (xsl, soap, pcntl) work as-is.
+ARG EXTRA_EXTENSIONS=""
+
 # Runtime libraries stay installed; build-only packages are purged in the same layer.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -77,6 +82,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         zip; \
     pecl install redis-6.3.0; \
     docker-php-ext-enable redis; \
+    if [ -n "${EXTRA_EXTENSIONS}" ]; then \
+        docker-php-ext-install -j"$(nproc)" ${EXTRA_EXTENSIONS}; \
+    fi; \
     apt-get purge -y -qq ${PHPIZE_DEPS}; \
     apt-get autoremove -y -qq; \
     rm -rf /tmp/* /var/tmp/* /usr/src/php*
@@ -86,8 +94,9 @@ RUN git config --global --add safe.directory '*'
 
 # -----------------------------------------------------------------------------
 # Stage 2: Composer binary (no duplicate Composer install logic)
+# Minor pinned for reproducibility; bumped deliberately via Dependabot.
 # -----------------------------------------------------------------------------
-FROM composer:2 AS composer-bin
+FROM composer:2.8 AS composer-bin
 
 # -----------------------------------------------------------------------------
 # Final image: PHP runtime + Composer + fail-fast validation
@@ -104,6 +113,22 @@ RUN --mount=type=cache,target=/tmp/composer-cache,sharing=locked \
     /usr/local/bin/verify-image.sh
 
 WORKDIR /builds
+
+# Default runs as root (most CI executors expect it). Set RUN_USER to a non-root
+# name to create that user and hand it /builds + the Composer cache, for orgs that
+# forbid root containers. Default behaviour is unchanged.
+ARG RUN_USER=root
+RUN set -eux; \
+    if [ "${RUN_USER}" != "root" ]; then \
+        useradd --create-home --shell /bin/bash "${RUN_USER}"; \
+        mkdir -p /builds /tmp/composer-cache; \
+        chown -R "${RUN_USER}:${RUN_USER}" /builds /tmp/composer-cache; \
+    fi
+USER ${RUN_USER}
+
+# Informational only: low value for ephemeral CI containers, but useful when the
+# image is reused in long-running dev environments / orchestrators.
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD php -v >/dev/null 2>&1 || exit 1
 
 ARG IMAGE_VERSION=1.1.0
 ARG PHP_VERSION=8.4

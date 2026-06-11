@@ -15,7 +15,7 @@ jobs:
   php-ci:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/himanshuramavat/php-ci:8.3
+      image: ghcr.io/himanshuramavat/php-ci:8.4
     defaults:
       run:
         shell: bash
@@ -34,12 +34,14 @@ jobs:
       - name: Run PHPUnit
         run: vendor/bin/phpunit --colors=always
 
-  # Pin immutable tag for release builds
+  # Pin immutable tag for release builds.
+  # Use the newest immutable tag from the Releases page, e.g. 8.4-v<LATEST>:
+  # https://github.com/himanshuramavat/php-ci/releases
   release-build:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/himanshuramavat/php-ci:8.4-v1.1.0
+      image: ghcr.io/himanshuramavat/php-ci:8.4-v<LATEST>
     steps:
       - uses: actions/checkout@v4
       - run: composer install --no-dev --prefer-dist --optimize-autoloader

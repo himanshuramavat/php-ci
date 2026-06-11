@@ -20,10 +20,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: [8.4, 8.3, 8.2, 8.1]
+        # Uncomment '8.5' once php:8.5-cli-bookworm is GA on Docker Hub.
+        php-version: [8.4, 8.3, 8.2, 8.1]  # , '8.5'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Set up QEMU (multi-arch)
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -41,22 +45,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.GHCR_IMAGE }}
+            ${{ env.DOCKERHUB_IMAGE }}
+          tags: |
+            type=raw,value=${{ matrix.php-version }}
+            type=raw,value=latest,enable=${{ matrix.php-version == '8.4' }}
+
       - name: Build and push rolling image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           build-args: |
             PHP_VERSION=${{ matrix.php-version }}
             IMAGE_VERSION=weekly-rebuild-${{ github.run_id }}
             SOURCE_REPOSITORY=${{ github.server_url }}/${{ github.repository }}
-          tags: |
-            ${{ env.GHCR_IMAGE }}:${{ matrix.php-version }}
-            ${{ env.DOCKERHUB_IMAGE }}:${{ matrix.php-version }}
-            type=raw,value=${{ env.GHCR_IMAGE }}:latest,enable=${{ matrix.php-version == '8.4' }}
-            type=raw,value=${{ env.DOCKERHUB_IMAGE }}:latest,enable=${{ matrix.php-version == '8.4' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=php-ci-weekly-rebuild-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-weekly-rebuild-${{ matrix.php-version }}
 

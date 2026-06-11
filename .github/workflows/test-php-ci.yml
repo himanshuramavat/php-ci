@@ -13,13 +13,27 @@ permissions:
   contents: read
 
 jobs:
+  lint-dockerfile:
+    name: Lint Dockerfile (hadolint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          config: .hadolint.yaml
+
   build-and-test:
     name: Build and test PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.4', '8.3', '8.2', '8.1']
+        # Uncomment '8.5' once php:8.5-cli-bookworm is GA on Docker Hub.
+        php-version: ['8.4', '8.3', '8.2', '8.1']  # , '8.5'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -43,23 +57,44 @@ jobs:
           cache-from: type=gha,scope=php-ci-test-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-test-${{ matrix.php-version }}
 
+      - name: Report image size
+        env:
+          MAX_IMAGE_MB: '550'
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          BYTES="$(docker image inspect -f '{{.Size}}' "${IMAGE}")"
+          MB=$(( BYTES / 1024 / 1024 ))
+          echo "| PHP ${{ matrix.php-version }} | ${MB} MB |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Image ${IMAGE}: ${MB} MB (soft limit ${MAX_IMAGE_MB} MB)"
+          if [ "${MB}" -gt "${MAX_IMAGE_MB}" ]; then
+            echo "::warning title=Image size::php-ci:${{ matrix.php-version }} is ${MB} MB, above the ${MAX_IMAGE_MB} MB soft limit"
+          fi
+
       - name: Scan image for vulnerabilities (Trivy)
         uses: ./.github/actions/trivy-image-scan
         with:
           image-ref: php-ci:test-${{ matrix.php-version }}
 
-      - name: Start PostgreSQL and Redis containers
+      - name: Start PostgreSQL, MariaDB and Redis containers
         run: |
           docker network create phpci-test || true
-          docker rm -f phpci-postgres phpci-redis 2>/dev/null || true
+          docker rm -f phpci-postgres phpci-mysql phpci-redis 2>/dev/null || true
           docker run -d --name phpci-postgres --network phpci-test \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=postgres \
             -e POSTGRES_DB=postgres \
             postgres:16-alpine
+          docker run -d --name phpci-mysql --network phpci-test \
+            -e MARIADB_ROOT_PASSWORD=root \
+            -e MARIADB_DATABASE=phpci \
+            mariadb:11
           docker run -d --name phpci-redis --network phpci-test redis:7-alpine
           for i in $(seq 1 30); do
             docker run --rm --network phpci-test postgres:16-alpine pg_isready -h phpci-postgres -p 5432 -U postgres >/dev/null 2>&1 && break
+            sleep 1
+          done
+          for i in $(seq 1 60); do
+            docker run --rm --network phpci-test mariadb:11 mariadb-admin ping -h phpci-mysql -uroot -proot --silent >/dev/null 2>&1 && break
             sleep 1
           done
           for i in $(seq 1 30); do
@@ -82,12 +117,36 @@ jobs:
             exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
           '
 
+      - name: Smoke test GD (truecolor + PNG/WebP/JPEG)
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          docker run --rm "${IMAGE}" php -r '
+            $img = imagecreatetruecolor(10, 10);
+            if ($img === false) { exit(1); }
+            imagefilledrectangle($img, 0, 0, 9, 9, imagecolorallocate($img, 1, 2, 3));
+            $ok = imagepng($img, "/tmp/gd.png")
+              && function_exists("imagewebp")
+              && function_exists("imagecreatefromjpeg")
+              && (imagefontwidth(1) > 0);
+            exit($ok ? 0 : 1);
+          '
+
       - name: Smoke test PostgreSQL PDO
         run: |
           IMAGE="php-ci:test-${{ matrix.php-version }}"
           docker run --rm --network phpci-test "${IMAGE}" php -r '
             $pdo = new PDO("pgsql:host=phpci-postgres;port=5432;dbname=postgres","postgres","postgres");
             $pdo->exec("CREATE TABLE t (id SERIAL PRIMARY KEY)");
+            $pdo->exec("INSERT INTO t (id) VALUES (1)");
+            exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
+          '
+
+      - name: Smoke test MySQL/MariaDB PDO
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          docker run --rm --network phpci-test "${IMAGE}" php -r '
+            $pdo = new PDO("mysql:host=phpci-mysql;port=3306;dbname=phpci","root","root");
+            $pdo->exec("CREATE TABLE t (id INT PRIMARY KEY)");
             $pdo->exec("INSERT INTO t (id) VALUES (1)");
             exit($pdo->query("SELECT COUNT(*) FROM t")->fetchColumn() == 1 ? 0 : 1);
           '
@@ -121,8 +180,29 @@ jobs:
             "php-ci:test-${{ matrix.php-version }}" \
             sh -c 'printf "%s\n" "{\"require\":{\"php\":\"*\"}}" > composer.json && composer install --no-interaction --no-progress'
 
-      - name: Stop PostgreSQL and Redis containers
+      - name: TYPO3 Testing Framework integration (SQLite)
+        if: matrix.php-version == '8.4'
+        continue-on-error: true
+        run: |
+          IMAGE="php-ci:test-${{ matrix.php-version }}"
+          docker run --rm "${IMAGE}" sh -eu -c '
+            mkdir -p /tmp/t3 && cd /tmp/t3
+            composer init --no-interaction --name=phpci/t3-smoke >/dev/null
+            composer config --no-plugins allow-plugins.typo3/cms-composer-installers true
+            composer config --no-plugins allow-plugins.typo3/class-alias-loader true
+            composer require --no-interaction --no-progress typo3/testing-framework >/dev/null
+            # Boot proof: the framework + TYPO3 core autoload and pdo_sqlite is usable.
+            php -r "
+              require \"vendor/autoload.php\";
+              \$ok = class_exists(\"TYPO3\\\\TestingFramework\\\\Core\\\\Functional\\\\FunctionalTestCase\")
+                && extension_loaded(\"pdo_sqlite\")
+                && (new PDO(\"sqlite::memory:\")) instanceof PDO;
+              exit(\$ok ? 0 : 1);
+            "
+          '
+
+      - name: Stop PostgreSQL, MariaDB and Redis containers
         if: always()
         run: |
-          docker rm -f phpci-postgres phpci-redis 2>/dev/null || true
+          docker rm -f phpci-postgres phpci-mysql phpci-redis 2>/dev/null || true
           docker network rm phpci-test 2>/dev/null || true

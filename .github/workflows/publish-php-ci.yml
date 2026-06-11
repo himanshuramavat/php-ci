@@ -11,6 +11,7 @@ on:
         required: true
         default: '1.1.0'
       php_versions:
+        # Add 8.5 once php:8.5-cli-bookworm is GA on Docker Hub.
         description: 'Comma-separated PHP minor versions to build (e.g. 8.4,8.3,8.2,8.1)'
         required: true
         default: '8.4,8.3,8.2,8.1'
@@ -26,6 +27,7 @@ env:
 permissions:
   contents: read
   packages: write
+  id-token: write   # keyless cosign signing via GitHub OIDC
 
 jobs:
   resolve-version:
@@ -83,8 +85,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Set up QEMU (multi-arch)
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
@@ -112,14 +120,15 @@ jobs:
             type=raw,value=latest,enable=${{ needs.resolve-version.outputs.push_latest == 'true' && matrix.php-version == needs.resolve-version.outputs.latest_php_version }}
 
       - name: Build and push image
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: linux/amd64
-          provenance: false
-          sbom: false
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
           build-args: |
             PHP_VERSION=${{ matrix.php-version }}
             IMAGE_VERSION=${{ needs.resolve-version.outputs.image_version }}
@@ -128,6 +137,18 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=php-ci-${{ matrix.php-version }}
           cache-to: type=gha,mode=max,scope=php-ci-${{ matrix.php-version }}
+
+      - name: Sign pushed images (cosign keyless)
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          # Sign each image ref by immutable digest (covers GHCR + Docker Hub).
+          for tag in ${TAGS}; do
+            repo="${tag%%:*}"
+            echo "Signing ${repo}@${DIGEST}"
+            cosign sign --yes "${repo}@${DIGEST}"
+          done
 
       - name: Scan published image for vulnerabilities (Trivy)
         uses: ./.github/actions/trivy-image-scan

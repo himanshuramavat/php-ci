@@ -1,0 +1,55 @@
+# Label taxonomy for php-ci. Synced to the repo by .github/workflows/labels.yml
+# (EndBug/label-sync) whenever this file changes on master.
+
+# --- Priority -------------------------------------------------------------
+- name: "prio: critical"
+  color: "b60205"
+  description: "Breaks core usage; fix ASAP"
+- name: "prio: high"
+  color: "d93f0b"
+  description: "Important; schedule soon"
+- name: "prio: medium"
+  color: "fbca04"
+  description: "Worth doing; not urgent"
+- name: "prio: low"
+  color: "0e8a16"
+  description: "Nice to have"
+
+# --- Type -----------------------------------------------------------------
+- name: "type: bug"
+  color: "ee0701"
+  description: "Something is broken"
+- name: "type: docs"
+  color: "1d76db"
+  description: "Documentation only"
+- name: "type: ci"
+  color: "5319e7"
+  description: "Workflows, pipelines, automation"
+- name: "type: security"
+  color: "b60205"
+  description: "Security / supply-chain"
+- name: "type: testing"
+  color: "0052cc"
+  description: "Tests and smoke checks"
+- name: "type: enhancement"
+  color: "a2eeef"
+  description: "New capability or improvement"
+
+# --- Area -----------------------------------------------------------------
+- name: "area: dockerfile"
+  color: "c5def5"
+  description: "Image / Dockerfile"
+- name: "area: workflows"
+  color: "c5def5"
+  description: ".github/workflows"
+- name: "area: examples"
+  color: "c5def5"
+  description: "Consumer examples"
+- name: "area: docs"
+  color: "c5def5"
+  description: "README and guides"
+
+# --- Misc -----------------------------------------------------------------
+- name: "dependencies"
+  color: "0366d6"
+  description: "Dependency / base-image updates"
