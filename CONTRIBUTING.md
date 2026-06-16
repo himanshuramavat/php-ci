@@ -76,6 +76,10 @@ Releases are immutable tags published by `.github/workflows/publish-php-ci.yml`:
 Rolling tags are additionally rebuilt weekly by `.github/workflows/weekly-rebuild.yml` to pick
 up Debian/PHP base updates.
 
+5. If `DOCKERHUB.md` changed, paste its contents into the
+   [Docker Hub repository description](https://hub.docker.com/r/himanshuramavat/php-ci)
+   (Docker Hub does not auto-sync this file).
+
 ## Labels
 
 Issues/PRs use the taxonomy in [`.github/labels.yml`](.github/labels.yml):

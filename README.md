@@ -3,6 +3,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2%20%7C%208.1-blue)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Docker-GHCR%20%7C%20Hub-blue)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-php--ci-blue)](https://himanshuramavat.github.io/php-ci-docs/)
 [![Test PHP CI Image](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
 [![Publish PHP CI Image](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
 [![Weekly Rebuild Rolling Tags](https://github.com/himanshuramavat/php-ci/actions/workflows/weekly-rebuild.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/weekly-rebuild.yml)
@@ -10,6 +11,9 @@
 [![Dependabot Updates](https://github.com/himanshuramavat/php-ci/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/dependabot/dependabot-updates)
 
 Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PHP** projects.
+
+**Documentation:** https://himanshuramavat.github.io/php-ci-docs/ — guides for
+TYPO3, Laravel, GitHub Actions, GitLab CI, Docker tags, and pinning.
 
 Build once, push to GitHub Container Registry (GHCR) and [Docker Hub](https://hub.docker.com/r/himanshuramavat/php-ci), and reuse across:
 
@@ -30,6 +34,7 @@ himanshuramavat/php-ci:8.4
 ## Table of Contents
 
 - Features
+- Documentation
 - Quick Start
 - Image Tagging Strategy
 - What's Included
@@ -45,6 +50,23 @@ himanshuramavat/php-ci:8.4
 - Security
 - Maintainer
 - License
+
+---
+
+## Documentation
+
+Full documentation is published at **[php-ci docs](https://himanshuramavat.github.io/php-ci-docs/)**:
+
+- [Introduction](https://himanshuramavat.github.io/php-ci-docs/docs/intro) — what the image is and when to use it
+- [Quick Start](https://himanshuramavat.github.io/php-ci-docs/docs/quick-start) — pull and run your first job
+- [Docker Tags](https://himanshuramavat.github.io/php-ci-docs/docs/reference/docker-tags) — rolling vs immutable tags
+- [TYPO3](https://himanshuramavat.github.io/php-ci-docs/docs/frameworks/typo3) / [Laravel](https://himanshuramavat.github.io/php-ci-docs/docs/frameworks/laravel) — framework recipes
+- [GitHub Actions](https://himanshuramavat.github.io/php-ci-docs/docs/ci-providers/github-actions) / [GitLab CI](https://himanshuramavat.github.io/php-ci-docs/docs/ci-providers/gitlab-ci) — copy-paste pipelines
+
+The docs site source lives in the separate [php-ci-docs](https://github.com/himanshuramavat/php-ci-docs) repository.
+
+The short [Docker Hub description](./DOCKERHUB.md) is maintained separately — copy it to
+[hub.docker.com/r/himanshuramavat/php-ci](https://hub.docker.com/r/himanshuramavat/php-ci) when it changes.
 
 ---
 
@@ -465,6 +487,10 @@ git push origin v1.0.0
 ---
 
 ## Consumer Examples
+
+See the [documentation site](https://himanshuramavat.github.io/php-ci-docs/) for
+framework-specific guides and CI provider examples. Snippets below mirror the
+in-repo `examples/` files.
 
 ### GitLab
 
