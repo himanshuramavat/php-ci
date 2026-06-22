@@ -96,7 +96,7 @@ RUN git config --global --add safe.directory '*'
 # Stage 2: Composer binary (no duplicate Composer install logic)
 # Minor pinned for reproducibility; bumped deliberately via Dependabot.
 # -----------------------------------------------------------------------------
-FROM composer:2.8 AS composer-bin
+FROM composer:2.10 AS composer-bin
 
 # -----------------------------------------------------------------------------
 # Final image: PHP runtime + Composer + fail-fast validation
