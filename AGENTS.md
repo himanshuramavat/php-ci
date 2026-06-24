@@ -21,7 +21,7 @@ Agent router for the reusable PHP CI Docker image. Load only what your task need
 |---|---|
 | Dockerfile / stages / build args / validation | `context/architecture.md` |
 | GitHub Actions (test, publish, weekly rebuild) | `context/ci-workflows.md` |
-| Consumer GitLab CI / T3Planet package pinning | `context/consumer-integration.md` |
+| Consumer GitLab CI / package pinning | `context/consumer-integration.md` |
 | Add or change a PHP extension | `context/tasks/add-extension.md` |
 | Cut a release / tag / publish | `context/tasks/release.md` |
 | Local build + smoke tests | `context/tasks/local-test.md` |
@@ -73,4 +73,4 @@ Release: see `context/tasks/release.md`.
 | Docs repo | https://github.com/himanshuramavat/php-ci-docs |
 | Published docs | https://himanshuramavat.github.io/php-ci-docs/ |
 
-Downstream consumers (e.g. T3Planet TYPO3 extensions) pin the **published** image — see `context/consumer-integration.md`.
+Downstream consumers (e.g. TYPO3 extensions) pin the **published** image — see `context/consumer-integration.md`.
