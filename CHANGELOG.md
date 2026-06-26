@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- (none)
+- Opt-in **`8.4-deploy`** image variant (`Dockerfile` `deploy` target) with `rsync` and
+  `openssh-client` for TYPO3/PHP deploy pipelines; published on release and weekly rebuild.
+- `scripts/verify-deploy-image.sh` — fail-fast validation for the deploy variant.
 
 ### Fixed
 

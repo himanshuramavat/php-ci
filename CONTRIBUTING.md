@@ -46,6 +46,24 @@ docker build --build-arg EXTRA_EXTENSIONS="soap xsl" ...
 
 Then run `./test-local.sh` to confirm the build still passes everywhere.
 
+## Deploy variant (`8.4-deploy`)
+
+Deploy tooling is **not** added to the default image. The `deploy` Dockerfile target adds
+`rsync` and `openssh-client` and is published as `8.4-deploy` (+ immutable `8.4-deploy-v<x.y.z>`).
+
+When changing deploy tooling:
+
+1. **`Dockerfile`** — `deploy` target apt packages.
+2. **`scripts/verify-deploy-image.sh`** — fail-fast checks (includes base `verify-image.sh`).
+3. **`README.md`** — *Deploy variant* section.
+
+Local build:
+
+```bash
+docker build --target deploy --build-arg PHP_VERSION=8.4 -t php-ci:8.4-deploy .
+docker run --rm php-ci:8.4-deploy /usr/local/bin/verify-deploy-image.sh
+```
+
 ## PHP version matrix
 
 PHP `8.1`–`8.4` are built. `8.5` rows are present but commented out across the workflows and

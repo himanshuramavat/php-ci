@@ -164,3 +164,86 @@ jobs:
           docker run --rm "${IMAGE}" php -m | grep -qi '^gd$'
           docker run --rm "${IMAGE}" php -m | grep -qi '^redis$'
           docker run --rm "${IMAGE}" composer --version
+
+  build-and-push-deploy:
+    name: Build PHP 8.4-deploy
+    needs: resolve-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up QEMU (multi-arch)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ env.GHCR_IMAGE }}
+            ${{ env.DOCKERHUB_IMAGE }}
+          tags: |
+            type=raw,value=8.4-deploy
+            type=raw,value=8.4-deploy-v${{ needs.resolve-version.outputs.image_version }}
+
+      - name: Build and push deploy image
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          target: deploy
+          push: true
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+          build-args: |
+            PHP_VERSION=8.4
+            IMAGE_VERSION=${{ needs.resolve-version.outputs.image_version }}
+            SOURCE_REPOSITORY=${{ github.server_url }}/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=php-ci-deploy-8.4
+          cache-to: type=gha,mode=max,scope=php-ci-deploy-8.4
+
+      - name: Sign pushed deploy images (cosign keyless)
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          for tag in ${TAGS}; do
+            repo="${tag%%:*}"
+            echo "Signing ${repo}@${DIGEST}"
+            cosign sign --yes "${repo}@${DIGEST}"
+          done
+
+      - name: Scan published deploy image for vulnerabilities (Trivy)
+        uses: ./.github/actions/trivy-image-scan
+        with:
+          image-ref: ${{ env.GHCR_IMAGE }}:8.4-deploy
+
+      - name: Post-build smoke test (deploy variant)
+        run: |
+          IMAGE="${{ env.DOCKERHUB_IMAGE }}:8.4-deploy"
+          docker pull "${IMAGE}"
+          docker run --rm "${IMAGE}" /usr/local/bin/verify-deploy-image.sh

@@ -136,8 +136,10 @@ composer install
 | `8.1` | Legacy | Rolling |
 | `latest` | Alias of highest PHP built (8.4) | Rolling |
 | `8.4-v<LATEST>` | Immutable release | Fixed |
+| `8.4-deploy` | PHP 8.4 + rsync + OpenSSH client (deploy pipelines) | Rolling |
+| `8.4-deploy-v<LATEST>` | Immutable deploy release | Fixed |
 
-> Immutable tags follow `<php>-v<x.y.z>`. Use the newest release from the
+> Immutable tags follow `<php>-v<x.y.z>` or `<php>-deploy-v<x.y.z>`. Use the newest release from the
 > [Releases page](https://github.com/himanshuramavat/php-ci/releases) — e.g. `8.4-v<LATEST>`.
 
 ### Recommendations
@@ -234,6 +236,26 @@ libfreetype6-dev
 - Git
 - jq
 
+### Deploy variant (`8.4-deploy`)
+
+Opt-in image for pipelines that rsync or SSH artifacts to remote hosts (common in TYPO3 deploy
+flows). Same PHP 8.4 stack as `:8.4`, plus:
+
+```text
+rsync
+openssh-client
+```
+
+Use `:8.4` for test/lint/analyse jobs; use `:8.4-deploy` only in deploy stages.
+
+```yaml
+# GitLab / GitHub Actions — deploy job only
+image: ghcr.io/himanshuramavat/php-ci:8.4-deploy
+```
+
+Immutable pin: `8.4-deploy-v<LATEST>` from the
+[Releases page](https://github.com/himanshuramavat/php-ci/releases).
+
 ### Validation
 
 Build immediately fails if:
@@ -276,7 +298,8 @@ Build immediately fails if:
 │   └── github-actions.example.yml
 ├── scripts/
 │   ├── test-local.sh
-│   └── verify-image.sh
+│   ├── verify-image.sh
+│   └── verify-deploy-image.sh
 ├── test-local.sh
 └── README.md
 ```
@@ -360,6 +383,13 @@ Keep the default image lean; opt into extras at build time instead of bloating i
 | `PHP_VERSION` | `8.4` | PHP minor to build |
 | `EXTRA_EXTENSIONS` | _(empty)_ | Space-separated extra core extensions (e.g. `soap xsl pcntl`) |
 | `RUN_USER` | `root` | Non-root runtime user when set to a non-root name |
+
+Deploy tooling (`rsync`, `openssh-client`) is **not** in the default image. Use the published
+`8.4-deploy` tag (or `docker build --target deploy`) instead of adding deploy packages to `:8.4`.
+
+```bash
+docker build --target deploy --build-arg PHP_VERSION=8.4 -t php-ci:8.4-deploy .
+```
 
 ```bash
 docker build \

@@ -141,3 +141,26 @@ LABEL maintainer="Himanshu Ramavat" \
     org.opencontainers.image.source="${SOURCE_REPOSITORY}" \
     project="php-ci" \
     php.version="${PHP_VERSION}"
+
+# -----------------------------------------------------------------------------
+# Optional deploy variant: rsync + SSH for TYPO3/PHP deploy pipelines.
+# Build: docker build --target deploy -t php-ci:8.4-deploy .
+# Published as :8.4-deploy (not part of default :8.4).
+# -----------------------------------------------------------------------------
+FROM final AS deploy
+
+USER root
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
+    apt-get update -qq; \
+    apt-get install -y -qq --no-install-recommends \
+        openssh-client \
+        rsync; \
+    rm -rf /var/lib/apt/lists/*
+
+COPY scripts/verify-deploy-image.sh /usr/local/bin/verify-deploy-image.sh
+RUN chmod +x /usr/local/bin/verify-deploy-image.sh && /usr/local/bin/verify-deploy-image.sh
+
+ARG RUN_USER=root
+USER ${RUN_USER}
