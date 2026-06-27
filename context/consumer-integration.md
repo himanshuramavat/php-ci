@@ -1,12 +1,12 @@
 # php-ci — Consumer Integration
 
-How downstream projects — especially T3Planet TYPO3 extensions — consume the image.
+How downstream projects — especially TYPO3 extensions — consume the image.
 
 ---
 
 ## Typical consumer pattern (GitLab CI)
 
-T3Planet packages pin **immutable** tags for reproducibility:
+packages pin **immutable** tags for reproducibility:
 
 ```yaml
 variables:
@@ -22,17 +22,6 @@ tests:
 ```
 
 **Lint / cs / stan** jobs often use a single pin, e.g. `8.2-v${PHP_CI_VERSION}`.
-
-### Known downstream consumers (T3Planet)
-
-| Package | Repository / path |
-|---|---|
-| `ns_aiuniverse` | `nitsan/ns-aiuniverse` — `.gitlab-ci.yml` |
-| `ns_t3ai` | `nitsan/ns-t3ai` — `.gitlab-ci.yml` |
-| `ns_t3aa` | `nitsan/ns-t3aa` — `.gitlab-ci.yml` |
-| `ns_t3cs` | `nitsan/ns-t3cs` — `.gitlab-ci.yml` |
-
-When cutting a new php-ci release, bump `PHP_CI_VERSION` in each consumer's `.gitlab-ci.yml` after the image is published.
 
 ---
 
@@ -81,7 +70,7 @@ Do **not** use `:8.4-deploy` for test/lint/analyse jobs.
 | Same GitHub org, private package | `packages: read` + `docker/login-action` with `GITHUB_TOKEN` |
 | Cross-org / GitLab / Jenkins | PAT with `read:packages` as CI secret |
 
-T3Planet GitLab jobs use Docker Hub ref `himanshuramavat/php-ci` by default (no GHCR login needed for public Hub pulls).
+GitLab jobs use Docker Hub ref `himanshuramavat/php-ci` by default (no GHCR login needed for public Hub pulls).
 
 ---
 
