@@ -47,4 +47,16 @@ for PHP_VERSION in ${PHP_VERSIONS}; do
   echo
 done
 
-echo "All local tests passed."
+echo "==> Building php-ci:test-8.4-deploy"
+DOCKER_BUILDKIT=1 docker build \
+  --target deploy \
+  --build-arg PHP_VERSION=8.4 \
+  --build-arg IMAGE_VERSION="local" \
+  --build-arg SOURCE_REPOSITORY="local" \
+  -t php-ci:test-8.4-deploy \
+  .
+
+echo "==> Verifying deploy image (8.4-deploy)"
+docker run --rm php-ci:test-8.4-deploy /usr/local/bin/verify-deploy-image.sh
+
+echo "All local tests passed (including 8.4-deploy)."

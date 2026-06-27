@@ -45,3 +45,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: composer install --no-dev --prefer-dist --optimize-autoloader
+
+  # Deploy jobs: use the opt-in deploy image (rsync + OpenSSH). Pin immutable tag for releases.
+  deploy:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/himanshuramavat/php-ci:8.4-deploy
+    steps:
+      - uses: actions/checkout@v4
+      - run: composer install --no-dev --prefer-dist --optimize-autoloader
+      - run: rsync -avz --delete -e ssh ./public/ "${DEPLOY_USER}@${DEPLOY_HOST}:/var/www/html/public/"
