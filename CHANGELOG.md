@@ -7,15 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- (none)
+
+## [1.5.0] - 2026-06-27
+
 ### Added
 
 - Opt-in **`8.4-deploy`** image variant (`Dockerfile` `deploy` target) with `rsync` and
   `openssh-client` for TYPO3/PHP deploy pipelines; published on release and weekly rebuild.
 - `scripts/verify-deploy-image.sh` — fail-fast validation for the deploy variant.
+- Contributor Covenant Code of Conduct.
+- Architecture, CI workflow, and project context documentation.
 
-### Fixed
+### Changed
 
-- (none)
+- Bumped Composer from 2.8 to 2.10.
+- Refreshed GitHub Actions dependency group.
+- Added optional deploy image variant documentation across README, Docker Hub description,
+  examples, and contributing docs.
 
 ## [1.4.0] - 2026-06-10
 
