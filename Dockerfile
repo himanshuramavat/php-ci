@@ -103,6 +103,21 @@ FROM composer:2.10 AS composer-bin
 # -----------------------------------------------------------------------------
 FROM php-runtime AS final
 
+# Refresh OS security patches on top of the cached runtime. This layer sits AFTER
+# the expensive extension-compile layer, so busting it (via SECURITY_REFRESH) lets
+# the weekly rebuild pull new Debian fixes for already-installed packages
+# (e.g. curl, libmariadb*) WITHOUT recompiling PHP extensions. Change the value of
+# SECURITY_REFRESH to force this layer (and everything below it) to re-run.
+ARG SECURITY_REFRESH=0
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
+    echo "security refresh token: ${SECURITY_REFRESH}"; \
+    apt-get update -qq; \
+    apt-get upgrade -y -qq --no-install-recommends; \
+    apt-get autoremove -y -qq; \
+    rm -rf /tmp/* /var/tmp/*
+
 COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 COPY scripts/verify-image.sh /usr/local/bin/verify-image.sh
 RUN chmod +x /usr/local/bin/verify-image.sh
