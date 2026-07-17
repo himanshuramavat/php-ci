@@ -62,11 +62,13 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          pull: true
           platforms: linux/amd64,linux/arm64
           build-args: |
             PHP_VERSION=${{ matrix.php-version }}
             IMAGE_VERSION=weekly-rebuild-${{ github.run_id }}
             SOURCE_REPOSITORY=${{ github.server_url }}/${{ github.repository }}
+            SECURITY_REFRESH=${{ github.run_id }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=php-ci-weekly-rebuild-${{ matrix.php-version }}
@@ -120,11 +122,13 @@ jobs:
           file: ./Dockerfile
           target: deploy
           push: true
+          pull: true
           platforms: linux/amd64,linux/arm64
           build-args: |
             PHP_VERSION=8.4
             IMAGE_VERSION=weekly-rebuild-${{ github.run_id }}
             SOURCE_REPOSITORY=${{ github.server_url }}/${{ github.repository }}
+            SECURITY_REFRESH=${{ github.run_id }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=php-ci-weekly-rebuild-deploy-8.4
