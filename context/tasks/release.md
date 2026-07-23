@@ -27,7 +27,7 @@ Push to `himanshuramavat/php-ci` remote (this nested repo's `origin`).
 
 ## What the publish workflow does
 
-1. Resolves version from tag (`v1.4.0` → `1.4.0`)
+1. Resolves version from tag (`v1.5.0` → `1.5.0`)
 2. Builds matrix PHP 8.4, 8.3, 8.2, 8.1 (unless manual dispatch overrides)
 3. Pushes to GHCR + Docker Hub:
    - `<php>` (rolling — also refreshed on weekly rebuild)
@@ -63,7 +63,7 @@ Bump `PHP_CI_VERSION` in each consumer's `.gitlab-ci.yml` (see `context/consumer
 | Tag | Updated by |
 |---|---|
 | `8.4`, `latest` | Weekly rebuild **and** each release push |
-| `8.4-v1.4.0` | **Only** at `v1.4.0` publish — frozen forever |
+| `8.4-v1.5.0` | **Only** at `v1.5.0` publish — frozen forever |
 
 Consumers on immutable pins must bump version to get security fixes.
 

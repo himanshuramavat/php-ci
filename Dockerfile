@@ -5,24 +5,24 @@
 # Build (PHP 8.4):
 #   docker build \
 #     --build-arg PHP_VERSION=8.4 \
-#     --build-arg IMAGE_VERSION=1.1.0 \
+#     --build-arg IMAGE_VERSION=1.5.0 \
 #     -t ghcr.io/himanshuramavat/php-ci:8.4 .
 #
 # Build (PHP 8.3):
 #   docker build \
 #     --build-arg PHP_VERSION=8.3 \
-#     --build-arg IMAGE_VERSION=1.1.0 \
+#     --build-arg IMAGE_VERSION=1.5.0 \
 #     -t ghcr.io/himanshuramavat/php-ci:8.3 .
 #
 # Build (PHP 8.1):
 #   docker build \
 #     --build-arg PHP_VERSION=8.1 \
-#     --build-arg IMAGE_VERSION=1.1.0 \
+#     --build-arg IMAGE_VERSION=1.5.0 \
 #     -t ghcr.io/himanshuramavat/php-ci:8.1 .
 # -----------------------------------------------------------------------------
 
 ARG PHP_VERSION=8.4
-ARG IMAGE_VERSION=1.1.0
+ARG IMAGE_VERSION=1.5.0
 
 # -----------------------------------------------------------------------------
 # Stage 1: PHP runtime with compiled extensions (single compile layer)
@@ -41,6 +41,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 ARG EXTRA_EXTENSIONS=""
 
 # Runtime libraries stay installed; build-only packages are purged in the same layer.
+# OS packages are refreshed at build time: rolling tags favour current upstream security
+# fixes, while immutable tags remain repeatable deployment pins by digest.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux; \
@@ -53,7 +55,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         jq \
         unzip \
         zip \
-        default-libmysqlclient-dev \
+        libfreetype6 \
+        libicu72 \
+        libjpeg62-turbo \
+        libonig5 \
+        libpng16-16 \
+        libpq5 \
+        libsqlite3-0 \
+        libwebp7 \
+        libxml2 \
+        libzip4 \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
@@ -85,7 +96,18 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     if [ -n "${EXTRA_EXTENSIONS}" ]; then \
         docker-php-ext-install -j"$(nproc)" ${EXTRA_EXTENSIONS}; \
     fi; \
-    apt-get purge -y -qq ${PHPIZE_DEPS}; \
+    apt-get purge -y -qq \
+        ${PHPIZE_DEPS} \
+        libfreetype6-dev \
+        libicu-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libpq-dev \
+        libsqlite3-dev \
+        libwebp-dev \
+        libxml2-dev \
+        libzip-dev; \
     apt-get autoremove -y -qq; \
     rm -rf /tmp/* /var/tmp/* /usr/src/php*
 
@@ -145,7 +167,7 @@ USER ${RUN_USER}
 # image is reused in long-running dev environments / orchestrators.
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD php -v >/dev/null 2>&1 || exit 1
 
-ARG IMAGE_VERSION=1.1.0
+ARG IMAGE_VERSION=1.5.0
 ARG PHP_VERSION=8.4
 ARG SOURCE_REPOSITORY=https://github.com/himanshuramavat/php-ci
 

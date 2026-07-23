@@ -53,7 +53,7 @@ final                            (AS deploy)    ← :8.4-deploy only
 | Arg | Default | Purpose |
 |---|---|---|
 | `PHP_VERSION` | `8.4` | PHP minor to build |
-| `IMAGE_VERSION` | `1.1.0` | Embedded in OCI labels / publish metadata |
+| `IMAGE_VERSION` | `1.5.0` | Embedded in OCI labels / publish metadata |
 | `SOURCE_REPOSITORY` | upstream URL | OCI `image.source` label |
 | `EXTRA_EXTENSIONS` | `""` | Space-separated extra core extensions (best-effort compile) |
 | `RUN_USER` | `root` | Non-root runtime user when set to e.g. `www-data` |
@@ -104,6 +104,7 @@ Checks:
 | Deploy as separate target/tag | Test/lint jobs stay lean; deploy tooling opt-in |
 | Pinned Composer minor | Reproducible builds; Dependabot bumps deliberately |
 | `linux/arm64` on publish | Multi-arch via QEMU in publish + weekly workflows |
+| OS package upgrades at build time | Rolling tags favour current Debian fixes; pin an immutable digest for repeatability |
 
 Soft image size limit in CI: **550 MB** (warning, not hard fail).
 

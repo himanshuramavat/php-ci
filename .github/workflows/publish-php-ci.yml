@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       image_version:
-        description: 'Semantic version embedded in tags (e.g. 1.1.0)'
+        description: 'Semantic version embedded in tags (e.g. 1.5.0)'
         required: true
-        default: '1.1.0'
+        default: '1.5.0'
       php_versions:
         # Add 8.5 once php:8.5-cli-bookworm is GA on Docker Hub.
         description: 'Comma-separated PHP minor versions to build (e.g. 8.4,8.3,8.2,8.1)'

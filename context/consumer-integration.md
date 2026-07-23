@@ -11,7 +11,7 @@ packages pin **immutable** tags for reproducibility:
 ```yaml
 variables:
   PHP_CI_IMAGE: "himanshuramavat/php-ci"
-  PHP_CI_VERSION: "1.4.0"   # bump when releasing new php-ci version
+  PHP_CI_VERSION: "1.5.0"   # bump when releasing new php-ci version
 
 tests:
   image: ${PHP_CI_IMAGE}:${PHP_VERSION}-v${PHP_CI_VERSION}
@@ -53,7 +53,7 @@ Use the **deploy variant** only in deploy stages:
 
 ```yaml
 deploy:production:
-  image: himanshuramavat/php-ci:8.4-deploy-v1.4.0
+  image: himanshuramavat/php-ci:8.4-deploy-v1.5.0
   script:
     - rsync -avz --delete -e ssh ./public/ user@host:/var/www/html/public/
 ```

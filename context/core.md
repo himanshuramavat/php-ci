@@ -46,12 +46,12 @@ Tags are identical on both registries. Prefer GHCR in CI to avoid Docker Hub ano
 | Pattern | Example | Mutability | When to use |
 |---|---|---|---|
 | Rolling minor | `8.4` | Rebuilt weekly | Dev / main-branch CI |
-| Immutable release | `8.4-v1.4.0` | Fixed at publish | Production pin |
+| Immutable release | `8.4-v1.5.0` | Fixed at publish | Production pin |
 | `latest` | `latest` | Rolling | Alias of highest PHP (8.4) |
 | Deploy rolling | `8.4-deploy` | Weekly | Deploy stages only |
-| Deploy immutable | `8.4-deploy-v1.4.0` | Fixed | Pinned deploy pipelines |
+| Deploy immutable | `8.4-deploy-v1.5.0` | Fixed | Pinned deploy pipelines |
 
-Current release pinned by downstream consumers: **1.4.0** (check `CHANGELOG.md` for latest).
+Current release pinned by downstream consumers: **1.5.0** (check `CHANGELOG.md` for latest).
 
 ---
 

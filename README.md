@@ -222,12 +222,12 @@ unzip
 zip
 jq
 ca-certificates
-libpq-dev
-libsqlite3-dev
-libpng-dev
-libjpeg62-turbo-dev
-libwebp-dev
-libfreetype6-dev
+libpq5
+libsqlite3-0
+libpng16-16
+libjpeg62-turbo
+libwebp7
+libfreetype6
 ```
 
 ### Tools
@@ -324,7 +324,7 @@ Benefits:
 - Less duplication
 - Better security
 
-Composer is copied from the official `composer:2.8` image. The minor is **pinned** for
+Composer is copied from the official `composer:2.10` image. The minor is **pinned** for
 reproducible builds and bumped deliberately via Dependabot (not rolling `composer:2`).
 
 ---
@@ -405,6 +405,12 @@ extra system libraries (e.g. `ldap`, `imagick`) may require a downstream `FROM` 
 
 ## Build / Login / Push / Pull
 For rolling tags and weekly rebuilds, see [CHANGELOG.md](./CHANGELOG.md) and the scheduled workflow in `.github/workflows/weekly-rebuild.yml`.
+
+Rolling tags intentionally install the latest available Debian updates at build time and are
+rebuilt weekly, so their contents can change. For a repeatable production deployment, pin an
+immutable release tag and preferably its published digest; update that pin to receive security
+fixes.
+
 ### Build
 
 PHP 8.3:
@@ -412,7 +418,7 @@ PHP 8.3:
 ```bash
 DOCKER_BUILDKIT=1 docker build \
 --build-arg PHP_VERSION=8.3 \
---build-arg IMAGE_VERSION=1.0.0 \
+--build-arg IMAGE_VERSION=1.5.0 \
 -t ghcr.io/himanshuramavat/php-ci:8.3 \
 -t ghcr.io/himanshuramavat/php-ci:latest \
 .
@@ -432,7 +438,7 @@ PHP 8.1:
 ```bash
 DOCKER_BUILDKIT=1 docker build \
 --build-arg PHP_VERSION=8.1 \
---build-arg IMAGE_VERSION=1.1.0 \
+--build-arg IMAGE_VERSION=1.5.0 \
 -t ghcr.io/himanshuramavat/php-ci:8.1 \
 .
 ```

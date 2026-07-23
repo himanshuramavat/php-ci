@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-- (none)
+### Changed
+
+- Updated default image metadata and consumer examples to the current 1.5.0 release.
+- Removed PHP build-only development headers from the published runtime image while retaining
+  the runtime libraries required by compiled extensions.
+- Documented the policy that rolling tags prioritise current OS security updates; immutable
+  release tags and digests are the reproducible deployment pins.
 
 ## [1.5.0] - 2026-06-27
 
