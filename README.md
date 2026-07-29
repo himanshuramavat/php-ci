@@ -4,11 +4,14 @@
 [![Docker](https://img.shields.io/badge/Docker-GHCR%20%7C%20Hub-blue)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-php--ci-blue)](https://himanshuramavat.github.io/php-ci-docs/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/himanshuramavat/php-ci?style=flat&logo=docker&label=Pulls)](https://hub.docker.com/r/himanshuramavat/php-ci)
+[![Docker Image Size](https://img.shields.io/docker/image-size/himanshuramavat/php-ci/latest?logo=docker&label=Size)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![Test PHP CI Image](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/test-php-ci.yml)
 [![Publish PHP CI Image](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/publish-php-ci.yml)
 [![Weekly Rebuild Rolling Tags](https://github.com/himanshuramavat/php-ci/actions/workflows/weekly-rebuild.yml/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/weekly-rebuild.yml)
 [![CodeQL](https://github.com/himanshuramavat/php-ci/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/github-code-scanning/codeql)
 [![Dependabot Updates](https://github.com/himanshuramavat/php-ci/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/himanshuramavat/php-ci/actions/workflows/dependabot/dependabot-updates)
+
 
 Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PHP** projects.
 
