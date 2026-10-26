@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         # Uncomment '8.5' once php:8.5-cli-bookworm is GA on Docker Hub.
-        php-version: [8.4, 8.3, 8.2, 8.1]  # , '8.5'
+        php-version: ['8.5', '8.4', '8.3', '8.2', '8.1']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
