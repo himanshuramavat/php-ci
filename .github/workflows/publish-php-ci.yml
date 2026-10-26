@@ -11,10 +11,9 @@ on:
         required: true
         default: '1.5.0'
       php_versions:
-        # Add 8.5 once php:8.5-cli-bookworm is GA on Docker Hub.
-        description: 'Comma-separated PHP minor versions to build (e.g. 8.4,8.3,8.2,8.1)'
+                description: 'Comma-separated PHP minor versions to build (e.g. 8.5,8.4,8.3,8.2,8.1)'
         required: true
-        default: '8.4,8.3,8.2,8.1'
+            default: '8.5,8.4,8.3,8.2,8.1'  
       push_latest:
         description: 'Push :latest tag (only applied to the highest PHP version built)'
         type: boolean
@@ -57,7 +56,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             versions="${{ github.event.inputs.php_versions }}"
           else
-            versions="8.4,8.3,8.2,8.1"
+                versions="8.5,8.4,8.3,8.2,8.1"      
           fi
           php_matrix="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | jq -R . | jq -s -c .)"
           latest_php_version="$(echo "${versions}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -rn | head -n1)"
