@@ -2,7 +2,8 @@
 # -----------------------------------------------------------------------------
 # Reusable PHP CI image for TYPO3, Laravel and general PHP pipelines.
 #
-# Build (PHP 8.4):
+# Build (PHP 8.4):# Build (PHP 8.5):
+
 #   docker build \
 #     --build-arg PHP_VERSION=8.4 \
 #     --build-arg IMAGE_VERSION=1.5.0 \
