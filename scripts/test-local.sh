@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PHP_VERSIONS="${PHP_VERSIONS:-8.4 8.3 8.2 8.1}"
+PHP_VERSIONS="${PHP_VERSIONS:-8.5 8.4 8.3 8.2 8.1}"
 
 cd "${ROOT_DIR}"
 
