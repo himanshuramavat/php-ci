@@ -1,6 +1,6 @@
 # php-ci — Reusable PHP CI Docker Image
 
-[![PHP](https://img.shields.io/badge/PHP-8.4%20%7C%208.3%20%7C%208.2%20%7C%208.1-blue)](https://www.php.net/)
+![PHP](https://img.shields.io/badge/PHP-8.5%20%7C%208.4%20%7C%208.3%20%7C%208.2%20%7C%208.1-blue)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Docker-GHCR%20%7C%20Hub-blue)](https://hub.docker.com/r/himanshuramavat/php-ci)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](./LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-php--ci-blue)](https://himanshuramavat.github.io/php-ci-docs/)
@@ -75,7 +75,7 @@ The short [Docker Hub description](./DOCKERHUB.md) is maintained separately — 
 
 ## Features
 
-✅ PHP 8.4, 8.3, 8.2 and 8.1 support
+✅ PHP 8.5, 8.4, 8.3, 8.2 and 8.1 support
 
 ✅ Composer 2 pre-installed
 
