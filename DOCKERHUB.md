@@ -12,13 +12,13 @@ docker pull himanshuramavat/php-ci:8.4
 docker pull ghcr.io/himanshuramavat/php-ci:8.4
 ```
 
-**Tags:** `8.4`, `8.3`, `8.2`, `8.1`, `latest` (rolling), and immutable `<php>-v<x.y.z>` releases.
+**Tags:** `8.5`, `8.4`, `8.3`, `8.2`, `8.1`, `latest` (rolling), and immutable `<php>-v<x.y.z>` releases.
 
 ---
 
 ## Features
 
-✅ PHP 8.4, 8.3, 8.2 and 8.1 support
+✅ PHP 8.5, 8.4, 8.3, 8.2 and 8.1 support
 
 ✅ Composer 2 pre-installed
 
