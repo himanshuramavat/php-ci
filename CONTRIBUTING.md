@@ -13,8 +13,8 @@ the (easy-to-get-wrong) extension-addition flow, and the release process.
 The root wrapper mirrors `.github/workflows/test-php-ci.yml`:
 
 ```bash
-./test-local.sh                 # builds + tests all PHP versions (8.4 8.3 8.2 8.1)
-PHP_VERSIONS="8.4" ./test-local.sh   # single version, faster iteration
+./test-local.sh                 # builds + tests all PHP versions (8.5 8.4 8.3 8.2 8.1)
+PHP_VERSIONS="8.5" ./test-local.sh   # single version, faster iteration
 ```
 
 It delegates to [`scripts/test-local.sh`](scripts/test-local.sh) and runs, per version:
@@ -29,10 +29,9 @@ trivy image php-ci:test-8.4                           # CVE scan (matches CI)
 
 ## Adding a PHP extension
 
-The extension list lives in **three** places that must stay in sync — update **all three**:
+The extension list lives in **two** places that must stay in sync — update **both**:
 
-1. **`Dockerfile`** — add to the `docker-php-ext-install` list (and any required `-dev`
-   apt package + `docker-php-ext-configure`).
+1. **`Dockerfile`** — add to the `install-php-extensions` list.
 2. **`scripts/verify-image.sh`** — add to `REQUIRED_EXTENSIONS` so the build fails fast if it
    is missing.
 3. **`README.md`** — add to the *What's Included → PHP Extensions* list.
@@ -66,9 +65,7 @@ docker run --rm php-ci:8.4-deploy /usr/local/bin/verify-deploy-image.sh
 
 ## PHP version matrix
 
-PHP `8.1`–`8.4` are built. `8.5` rows are present but commented out across the workflows and
-will be enabled once `php:8.5-cli-bookworm` is GA on Docker Hub — uncomment the matrix rows
-and run the full local suite.
+PHP `8.1`–`8.5` are built.
 
 ## Commits
 

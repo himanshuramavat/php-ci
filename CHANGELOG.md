@@ -5,15 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.6.0] - 2026-10-28
+
+### Added
+- Official support for **PHP 8.5**.
 
 ### Changed
+- Rewrote the extension installation process to use `mlocati/docker-php-extension-installer`. This resolves critical build failures for PHP 8.5 (OPcache and Redis) and removes the need for manual system library (`lib*-dev`) management.
+- Simplified `Dockerfile` by removing fragile manual dependency purging logic.
 
-- Updated default image metadata and consumer examples to the current 1.5.0 release.
-- Removed PHP build-only development headers from the published runtime image while retaining
-  the runtime libraries required by compiled extensions.
-- Documented the policy that rolling tags prioritise current OS security updates; immutable
-  release tags and digests are the reproducible deployment pins.
+### Fixed
+- Fixed `redis` and `opcache` compilation errors on PHP 8.5.
+
 
 ## [1.5.0] - 2026-06-27
 

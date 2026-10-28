@@ -2,8 +2,12 @@
 # -----------------------------------------------------------------------------
 # Reusable PHP CI image for TYPO3, Laravel and general PHP pipelines.
 #
-# Build (PHP 8.4):# Build (PHP 8.5):
-
+# Build (PHP 8.5):
+#   docker build \
+#     --build-arg PHP_VERSION=8.5 \
+#     --build-arg IMAGE_VERSION=1.5.0 \
+#     -t ghcr.io/himanshuramavat/php-ci:8.5 .
+#
 #   docker build \
 #     --build-arg PHP_VERSION=8.4 \
 #     --build-arg IMAGE_VERSION=1.5.0 \
@@ -37,13 +41,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Optional extra core extensions, space-separated (e.g. "soap xsl pcntl ldap").
-# Built best-effort while the build toolchain is still present. Any system libs
-# these need must be provided via apt; common ones (xsl, soap, pcntl) work as-is.
+# These are installed via the extension installer.
 ARG EXTRA_EXTENSIONS=""
 
-# Runtime libraries stay installed; build-only packages are purged in the same layer.
-# OS packages are refreshed at build time: rolling tags favour current upstream security
-# fixes, while immutable tags remain repeatable deployment pins by digest.
+# Runtime libraries and extension installation.
+# We use mlocati/docker-php-extension-installer to handle complex dependencies
+# and version-specific quirks (especially for PHP 8.5).
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux; \
@@ -55,60 +58,28 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         git \
         jq \
         unzip \
-        zip \
-        libfreetype6 \
-        libicu72 \
-        libjpeg62-turbo \
-        libonig5 \
-        libpng16-16 \
-        libpq5 \
-        libsqlite3-0 \
-        libwebp7 \
-        libxml2 \
-        libzip4 \
-        libfreetype6-dev \
-        libicu-dev \
-        libjpeg62-turbo-dev \
-        libonig-dev \
-        libpng-dev \
-        libpq-dev \
-        libsqlite3-dev \
-        libwebp-dev \
-        libxml2-dev \
-        libzip-dev \
-        ${PHPIZE_DEPS}; \
-    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
-    docker-php-ext-configure intl; \
-    docker-php-ext-install -j"$(nproc)" \
+        zip; \
+    # Install the extension installer
+    curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o /usr/local/bin/install-php-extensions; \
+    chmod +x /usr/local/bin/install-php-extensions; \
+    # Install standard extensions (Opcache is built-in for PHP 8.5, handled automatically by installer)
+    install-php-extensions \
         bcmath \
         gd \
         intl \
         mbstring \
         mysqli \
-        opcache \
         pdo_mysql \
         pdo_pgsql \
         pdo_sqlite \
         pgsql \
         xml \
-        zip; \
-    pecl install redis-6.3.0; \
-    docker-php-ext-enable redis; \
+        zip \
+        redis; \
+    # Install optional extra extensions if provided
     if [ -n "${EXTRA_EXTENSIONS}" ]; then \
-        docker-php-ext-install -j"$(nproc)" ${EXTRA_EXTENSIONS}; \
+        install-php-extensions ${EXTRA_EXTENSIONS}; \
     fi; \
-    apt-get purge -y -qq \
-        ${PHPIZE_DEPS} \
-        libfreetype6-dev \
-        libicu-dev \
-        libjpeg62-turbo-dev \
-        libonig-dev \
-        libpng-dev \
-        libpq-dev \
-        libsqlite3-dev \
-        libwebp-dev \
-        libxml2-dev \
-        libzip-dev; \
     apt-get autoremove -y -qq; \
     rm -rf /tmp/* /var/tmp/* /usr/src/php*
 

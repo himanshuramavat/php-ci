@@ -7,9 +7,9 @@ Production-ready, reusable CI image for **TYPO3**, **Laravel**, and general **PH
 **Pull:**
 
 ```bash
-docker pull himanshuramavat/php-ci:8.4
+docker pull himanshuramavat/php-ci:8.5
 # or
-docker pull ghcr.io/himanshuramavat/php-ci:8.4
+docker pull ghcr.io/himanshuramavat/php-ci:8.5
 ```
 
 **Tags:** `8.5`, `8.4`, `8.3`, `8.2`, `8.1`, `latest` (rolling), and immutable `<php>-v<x.y.z>` releases.
